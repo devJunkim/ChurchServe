@@ -1,0 +1,29 @@
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<header class="site-header">
+  <a routerLink="/" class="brand" aria-label="ChurchServe home">
+    <span class="brand-mark" aria-hidden="true">CS</span>
+    <span>{{ applicationName }}</span>
+  </a>
+
+  <nav aria-label="Primary navigation">
+    <a routerLink="/schedule" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+      Schedule
+    </a>
+    <a
+      routerLink="/volunteers"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Volunteers
+    </a>
+  </nav>
+</header>
+
+<main id="main-content" tabindex="-1">
+  <router-outlet />
+</main>
+
+<footer class="site-footer">
+  <p>Thoughtful scheduling for people who serve.</p>
+</footer>
