@@ -1,5 +1,21 @@
-<section class="placeholder-page">
+<section class="schedule-page" aria-labelledby="schedule-heading">
   <p class="eyebrow">Schedule</p>
-  <h1>Plan upcoming services</h1>
-  <p>Service events and ministry positions will be added here in the next parts of the tutorial.</p>
+  <h1 id="schedule-heading">Upcoming services</h1>
+  <p class="introduction">
+    Review each event's time, location, and current volunteer coverage. Detailed assignments arrive
+    in later parts of the tutorial.
+  </p>
+
+  <div class="event-grid">
+    @for (event of events(); track event.id) {
+      <app-service-event-card [event]="event" (selected)="selectEvent($event)" />
+    }
+  </div>
+
+  @if (selectedEvent(); as event) {
+    <p class="selection-status" role="status">
+      <strong>{{ event.title }}</strong> selected. Detailed scheduling will be added in a later
+      part.
+    </p>
+  }
 </section>
