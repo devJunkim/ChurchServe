@@ -1,0 +1,61 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path=".prettierrc" />
+    <File Path="angular.json" />
+    <File Path="package-lock.json" />
+    <File Path="package.json" />
+    <File Path="README.md" />
+    <File Path="tsconfig.app.json" />
+    <File Path="tsconfig.json" />
+    <File Path="tsconfig.spec.json" />
+  </Folder>
+  <Folder Name="/.vscode/">
+    <File Path=".vscode\extensions.json" />
+    <File Path=".vscode\launch.json" />
+    <File Path=".vscode\tasks.json" />
+  </Folder>
+  <Folder Name="/public/">
+    <File Path="public\favicon.ico" />
+  </Folder>
+  <Folder Name="/src/">
+    <File Path="src\index.html" />
+    <File Path="src\main.ts" />
+    <File Path="src\styles.scss" />
+  </Folder>
+  <Folder Name="/src/app/">
+    <File Path="src\app\app.config.ts" />
+    <File Path="src\app\app.html" />
+    <File Path="src\app\app.routes.ts" />
+    <File Path="src\app\app.scss" />
+    <File Path="src\app\app.spec.ts" />
+    <File Path="src\app\app.ts" />
+  </Folder>
+  <Folder Name="/src/app/features/">
+    <File Path="src\app\features\placeholder-page.scss" />
+  </Folder>
+  <Folder Name="/src/app/features/home/">
+    <File Path="src\app\features\home\home.html" />
+    <File Path="src\app\features\home\home.scss" />
+    <File Path="src\app\features\home\home.spec.ts" />
+    <File Path="src\app\features\home\home.ts" />
+  </Folder>
+  <Folder Name="/src/app/features/schedule/">
+    <File Path="src\app\features\schedule\schedule.html" />
+    <File Path="src\app\features\schedule\schedule.scss" />
+    <File Path="src\app\features\schedule\schedule.spec.ts" />
+    <File Path="src\app\features\schedule\schedule.ts" />
+    <File Path="src\app\features\schedule\service-event.ts" />
+  </Folder>
+  <Folder Name="/src/app/features/schedule/service-event-card/">
+    <File Path="src\app\features\schedule\service-event-card\service-event-card.html" />
+    <File Path="src\app\features\schedule\service-event-card\service-event-card.scss" />
+    <File Path="src\app\features\schedule\service-event-card\service-event-card.spec.ts" />
+    <File Path="src\app\features\schedule\service-event-card\service-event-card.ts" />
+  </Folder>
+  <Folder Name="/src/app/features/volunteers/">
+    <File Path="src\app\features\volunteers\volunteers.html" />
+    <File Path="src\app\features\volunteers\volunteers.ts" />
+  </Folder>
+</Solution>
