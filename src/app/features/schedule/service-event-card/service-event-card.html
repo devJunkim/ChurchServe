@@ -1,0 +1,29 @@
+<article class="event-card">
+  <div class="event-copy">
+    <p class="event-date">
+      <time [attr.datetime]="event().startsAt">
+        {{ event().startsAt | date: 'EEEE, MMMM d' }}
+      </time>
+    </p>
+    <h2>{{ event().title }}</h2>
+    <p class="event-meta">
+      <time [attr.datetime]="event().startsAt">
+        {{ event().startsAt | date: 'shortTime' }}
+      </time>
+      <span aria-hidden="true">·</span>
+      <span>{{ event().location }}</span>
+    </p>
+  </div>
+
+  @if (openPositions() === 0) {
+    <p class="staffing complete">Fully staffed</p>
+  } @else {
+    <p class="staffing open">
+      {{ openPositions() }} open {{ openPositions() === 1 ? 'position' : 'positions' }}
+    </p>
+  }
+
+  <button type="button" (click)="selectEvent()" [attr.aria-label]="'View ' + event().title">
+    View schedule
+  </button>
+</article>
