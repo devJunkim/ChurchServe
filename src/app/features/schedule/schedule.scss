@@ -40,6 +40,64 @@ h1 {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
 }
 
+.state-panel {
+  margin: 2.5rem 0 0;
+  padding: 1.25rem;
+  border: 1px solid #bcccdc;
+  border-radius: 0.85rem;
+  background: #f6f8fa;
+  color: #334e68;
+  line-height: 1.6;
+}
+
+.state-panel h2,
+.state-panel p {
+  margin: 0;
+}
+
+.state-panel p + button {
+  margin-top: 1rem;
+}
+
+.error-state {
+  border-color: #e6a5a5;
+  background: #fff5f5;
+  color: #7f1d1d;
+}
+
+.error-state button {
+  padding: 0.65rem 1rem;
+  border: 0;
+  border-radius: 0.55rem;
+  background: #9b2c2c;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.error-state button:hover {
+  background: #7f1d1d;
+}
+
+.error-state button:focus-visible {
+  outline: 3px solid #fdba74;
+  outline-offset: 3px;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+}
+
+.empty-state h2 {
+  color: #102a43;
+}
+
+.empty-state p {
+  margin-top: 0.35rem;
+}
+
 .selection-status {
   margin: 1.25rem 0 0;
   padding: 0.9rem 1rem;

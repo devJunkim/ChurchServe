@@ -6,11 +6,32 @@
     in later parts of the tutorial.
   </p>
 
-  <div class="event-grid">
-    @for (event of events(); track event.id) {
-      <app-service-event-card [event]="event" (selected)="selectEvent($event)" />
+  @switch (state().status) {
+    @case ('loading') {
+      <p class="state-panel" role="status">Loading service schedule…</p>
     }
-  </div>
+
+    @case ('error') {
+      <section class="state-panel error-state" role="alert">
+        <h2>Schedule unavailable</h2>
+        <p>{{ errorMessage() }}</p>
+        <button type="button" (click)="reload()">Try again</button>
+      </section>
+    }
+
+    @case ('ready') {
+      <div class="event-grid">
+        @for (event of events(); track event.id) {
+          <app-service-event-card [event]="event" (selected)="selectEvent($event)" />
+        } @empty {
+          <section class="state-panel empty-state">
+            <h2>No upcoming services</h2>
+            <p>Create an event when the next schedule is ready.</p>
+          </section>
+        }
+      </div>
+    }
+  }
 
   @if (selectedEvent(); as event) {
     <p class="selection-status" role="status">
