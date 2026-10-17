@@ -56,8 +56,9 @@
     <File Path="src\app\features\schedule\schedule.scss" />
     <File Path="src\app\features\schedule\schedule.spec.ts" />
     <File Path="src\app\features\schedule\schedule.ts" />
-    <File Path="src\app\features\schedule\service-event-store.spec.ts" />
-    <File Path="src\app\features\schedule\service-event-store.ts" />
+    <File Path="src\app\features\schedule\in-memory-service-event-repository.spec.ts" />
+    <File Path="src\app\features\schedule\in-memory-service-event-repository.ts" />
+    <File Path="src\app\features\schedule\service-event-repository.ts" />
     <File Path="src\app\features\schedule\service-event.ts" />
   </Folder>
   <Folder Name="/src/app/features/schedule/service-event-create/">

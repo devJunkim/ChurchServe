@@ -2,13 +2,20 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { NotFound } from './features/not-found/not-found';
+import { InMemoryServiceEventRepository } from './features/schedule/in-memory-service-event-repository';
 import { ServiceEventCreate } from './features/schedule/service-event-create/service-event-create';
 import { ServiceEventDetail } from './features/schedule/service-event-detail/service-event-detail';
+import { ServiceEventRepository } from './features/schedule/service-event-repository';
 import { routes } from './app.routes';
 
 describe('application routes', () => {
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideRouter(routes)] });
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter(routes),
+        { provide: ServiceEventRepository, useClass: InMemoryServiceEventRepository },
+      ],
+    });
   });
 
   it('opens a service detail route with its ID', async () => {

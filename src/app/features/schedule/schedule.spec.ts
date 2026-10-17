@@ -1,11 +1,18 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { InMemoryServiceEventRepository } from './in-memory-service-event-repository';
 import { Schedule } from './schedule';
+import { ServiceEventRepository } from './service-event-repository';
 import { ServiceEvent } from './service-event';
 
 describe('Schedule', () => {
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        { provide: ServiceEventRepository, useClass: InMemoryServiceEventRepository },
+      ],
+    });
   });
 
   it('renders the event collection with detail links', () => {
