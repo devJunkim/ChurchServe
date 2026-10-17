@@ -42,6 +42,9 @@
     <File Path="src\app\features\home\home.ts" />
   </Folder>
   <Folder Name="/src/app/features/schedule/">
+    <File Path="src\app\features\schedule\assignment-store.spec.ts" />
+    <File Path="src\app\features\schedule\assignment-store.ts" />
+    <File Path="src\app\features\schedule\assignment.ts" />
     <File Path="src\app\features\schedule\schedule.html" />
     <File Path="src\app\features\schedule\schedule.scss" />
     <File Path="src\app\features\schedule\schedule.spec.ts" />
