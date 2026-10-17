@@ -1,0 +1,46 @@
+:host {
+  display: block;
+}
+
+.empty-state {
+  padding: 1.5rem;
+  border: 1px solid #bcccdc;
+  border-radius: 0.85rem;
+  background: #f6f8fa;
+  color: #334e68;
+  text-align: center;
+}
+
+.empty-state--warning {
+  border-color: #e6a5a5;
+  background: #fff5f5;
+  color: #7f1d1d;
+}
+
+h2 {
+  margin: 0;
+  color: #102a43;
+  font-size: 1.35rem;
+}
+
+.empty-state--warning h2 {
+  color: #7f1d1d;
+}
+
+.empty-state__body {
+  margin-top: 0.4rem;
+  line-height: 1.6;
+}
+
+.empty-state__body :where(p) {
+  margin: 0;
+}
+
+.empty-state__actions {
+  margin-top: 1rem;
+}
+
+.empty-state__actions:empty {
+  display: none;
+  margin: 0;
+}

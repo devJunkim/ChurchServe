@@ -7,8 +7,8 @@
     </p>
   </header>
 
-  <section class="search-panel" aria-labelledby="volunteer-search-heading">
-    <h2 id="volunteer-search-heading">Volunteer directory</h2>
+  <app-panel>
+    <span panel-title>Volunteer directory</span>
     <label for="volunteer-query">Name</label>
     <input
       id="volunteer-query"
@@ -19,11 +19,11 @@
       placeholder="Try Anna or Morgan"
     />
     <p id="volunteer-search-hint" class="hint">Enter at least two characters.</p>
-  </section>
+  </app-panel>
 
   @if (results$ | async; as state) {
-    <section class="results" aria-labelledby="volunteer-results-heading">
-      <h2 id="volunteer-results-heading">Results</h2>
+    <app-panel>
+      <span panel-title>Results</span>
 
       @switch (state.status) {
         @case ('idle') {
@@ -40,7 +40,10 @@
         }
         @case ('loaded') {
           @if (state.volunteers.length === 0) {
-            <p class="request-state">No volunteers match that name.</p>
+            <app-empty-state>
+              <span empty-title>No matching volunteers</span>
+              <p>Try a different name or a broader search.</p>
+            </app-empty-state>
           } @else {
             <p class="result-count" role="status">
               {{ state.volunteers.length }}
@@ -62,6 +65,6 @@
           }
         }
       }
-    </section>
+    </app-panel>
   }
 </main>

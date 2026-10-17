@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+
+.panel {
+  padding: clamp(1.25rem, 4vw, 2rem);
+  border: 1px solid #d7e2e0;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 1rem 2.5rem rgb(16 42 67 / 7%);
+}
+
+.panel--subtle {
+  border-color: #d9e2ec;
+  background: #f8fafc;
+  box-shadow: none;
+}
+
+.panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+}
+
+h2 {
+  margin: 0;
+  color: #102a43;
+  font-size: 1.35rem;
+}
+
+.panel__actions:empty {
+  display: none;
+}

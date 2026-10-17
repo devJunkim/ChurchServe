@@ -4,10 +4,10 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 11: Calendar Filters, Query Parameters,
-and Pagination**. The Schedule page now keeps its month, ministry, and page in the URL,
-so a filtered view survives refreshes and can be shared. Its Angular repository sends a
-typed query to an ASP.NET Core endpoint that filters, sorts, and pages in SQLite.
+This repository currently represents **Part 12: Reusable UI and Content Projection**.
+The Schedule and Volunteers pages now share accessible panel and empty-state components.
+Named content slots let each feature keep its own language and actions while the shared
+components own stable structure, styling, labels, and a small set of deliberate tones.
 
 ## Pinned toolchain
 
@@ -56,7 +56,7 @@ SQLite keeps schedule and volunteer data runnable without installing a database 
 The EF Core boundary remains provider-focused so a later part can replace SQLite with
 Microsoft SQL Server while preserving the HTTP contract and Angular repositories.
 
-## Verify Part 11
+## Verify Part 12
 
 ```bash
 dotnet test ChurchServe.slnx
@@ -66,10 +66,10 @@ npm run build
 
 The API integration tests use isolated in-memory SQLite databases to verify schedule
 filtering, deterministic paging, persistence, and the volunteer search contract.
-Angular tests protect URL query parsing, router-driven filters, HTTP repositories,
-runtime DTO validation, request states, retry behavior, debouncing, and cancellation.
-The production build verifies strict TypeScript and Angular template compilation across
-every lazy feature route.
+Angular tests protect content projection, unique accessible labels, caller-owned actions,
+URL query parsing, router-driven filters, HTTP repositories, request states, retry
+behavior, debouncing, and cancellation. The production build verifies strict TypeScript
+and Angular template compilation across every lazy feature route.
 
 ## Current structure
 
@@ -103,6 +103,10 @@ src/app/
       volunteers.html
       volunteers.scss
       volunteers.ts
+  shared/
+    ui/
+      empty-state/
+      panel/
   app.config.ts
   app.html
   app.routes.ts

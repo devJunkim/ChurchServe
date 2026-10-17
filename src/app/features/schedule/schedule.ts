@@ -19,6 +19,8 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import { EmptyState } from '../../shared/ui/empty-state/empty-state';
+import { Panel } from '../../shared/ui/panel/panel';
 import { Page } from './page';
 import { equalScheduleQuery, parseScheduleQuery, scheduleMinistries } from './schedule-query';
 import { ServiceEventCard } from './service-event-card/service-event-card';
@@ -32,7 +34,7 @@ export type ScheduleState =
 
 @Component({
   selector: 'app-schedule',
-  imports: [RouterLink, ServiceEventCard],
+  imports: [RouterLink, ServiceEventCard, EmptyState, Panel],
   templateUrl: './schedule.html',
   styleUrl: './schedule.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -100,6 +102,10 @@ export class Schedule {
 
   protected changeMinistry(ministry: string): void {
     void this.navigate({ ministry: ministry || null, page: 1 });
+  }
+
+  protected showAllMinistries(): void {
+    this.changeMinistry('');
   }
 
   protected changePage(page: number): void {
