@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { CreateServiceEventCommand } from '../create-service-event-command';
 import { ServiceEventForm } from '../service-event-form/service-event-form';
@@ -14,18 +15,21 @@ import { ServiceEventRepository } from '../service-event-repository';
 export class ServiceEventCreate {
   private readonly router = inject(Router);
   private readonly repository = inject(ServiceEventRepository);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly saveError = signal('');
 
   protected createEvent(command: CreateServiceEventCommand): void {
     this.saveError.set('');
-    try {
-      const event = this.repository.create(command);
-      void this.router.navigate(['/schedule', event.id]);
-    } catch {
-      this.saveError.set(
-        'The event could not be saved in this browser. Check storage permissions and try again.',
-      );
-    }
+    this.repository
+      .create(command)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (event) => void this.router.navigate(['/schedule', event.id]),
+        error: () =>
+          this.saveError.set(
+            'The event could not be created. Check your connection and try again.',
+          ),
+      });
   }
 }

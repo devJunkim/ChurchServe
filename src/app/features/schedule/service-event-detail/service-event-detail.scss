@@ -77,6 +77,25 @@ dd {
   background: #fff5f5;
 }
 
+.detail-state {
+  padding: 1.25rem;
+  border: 1px solid #d9e2ec;
+  border-radius: 0.85rem;
+  background: #fff;
+  color: #52667a;
+}
+
+.error-state {
+  border-color: #e6a5a5;
+  background: #fff5f5;
+  color: #7f1d1d;
+}
+
+.error-state h1 {
+  color: #7f1d1d;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+}
+
 .missing-event p:not(.eyebrow) {
   margin: 1rem 0;
   color: #7f1d1d;

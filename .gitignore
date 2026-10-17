@@ -5,6 +5,11 @@
 /tmp
 /out-tsc
 /bazel-out
+[Bb]in/
+[Oo]bj/
+*.db
+*.db-shm
+*.db-wal
 
 # Node
 /node_modules
