@@ -20,6 +20,12 @@
     }
 
     @case ('ready') {
+      <app-service-event-form (submitted)="createEvent($event)" />
+
+      @if (submissionMessage()) {
+        <p class="creation-status" role="status">{{ submissionMessage() }}</p>
+      }
+
       <div class="event-grid">
         @for (event of events(); track event.id) {
           <app-service-event-card [event]="event" (selected)="selectEvent($event)" />
