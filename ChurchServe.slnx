@@ -56,10 +56,16 @@
     <File Path="src\app\features\schedule\schedule.scss" />
     <File Path="src\app\features\schedule\schedule.spec.ts" />
     <File Path="src\app\features\schedule\schedule.ts" />
-    <File Path="src\app\features\schedule\in-memory-service-event-repository.spec.ts" />
-    <File Path="src\app\features\schedule\in-memory-service-event-repository.ts" />
     <File Path="src\app\features\schedule\service-event-repository.ts" />
     <File Path="src\app\features\schedule\service-event.ts" />
+  </Folder>
+  <Folder Name="/src/app/features/schedule/persistence/">
+    <File Path="src\app\features\schedule\persistence\key-value-storage.ts" />
+    <File Path="src\app\features\schedule\persistence\local-data.spec.ts" />
+    <File Path="src\app\features\schedule\persistence\local-data.ts" />
+    <File Path="src\app\features\schedule\persistence\local-storage-service-event-repository.spec.ts" />
+    <File Path="src\app\features\schedule\persistence\local-storage-service-event-repository.ts" />
+    <File Path="src\app\features\schedule\persistence\provide-local-persistence.ts" />
   </Folder>
   <Folder Name="/src/app/features/schedule/service-event-create/">
     <File Path="src\app\features\schedule\service-event-create\service-event-create.html" />
