@@ -1,22 +1,24 @@
 import { TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
+import { provideRouter } from '@angular/router';
 import { Schedule } from './schedule';
 import { ServiceEvent } from './service-event';
-import { ServiceEventForm } from './service-event-form/service-event-form';
 
 describe('Schedule', () => {
-  it('renders the event collection and owns card selection', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+  });
+
+  it('renders the event collection with detail links', () => {
     const fixture = TestBed.createComponent(Schedule);
     fixture.detectChanges();
 
     const element: HTMLElement = fixture.nativeElement;
     expect(element.querySelectorAll('app-service-event-card')).toHaveLength(2);
-
-    element.querySelector<HTMLButtonElement>('app-service-event-card button')?.click();
-    fixture.detectChanges();
-
-    expect(element.querySelector('[role="status"]')?.textContent).toContain(
-      'Sunday Morning Service selected',
+    expect(element.querySelector('app-service-event-card a')?.getAttribute('href')).toBe(
+      '/schedule/sunday-2026-11-01',
+    );
+    expect(element.querySelector('.schedule-actions a')?.getAttribute('href')).toBe(
+      '/schedule/new',
     );
   });
 
@@ -91,27 +93,5 @@ describe('Schedule', () => {
 
     expect(cardsAfter[0]).toBe(cardsBefore[1]);
     expect(cardsAfter[1]).toBe(cardsBefore[0]);
-  });
-
-  it('adds a valid creation command to the in-memory schedule', () => {
-    const fixture = TestBed.createComponent(Schedule);
-    fixture.detectChanges();
-    const form = fixture.debugElement.query(By.directive(ServiceEventForm))
-      .componentInstance as ServiceEventForm;
-
-    form.form.setValue({
-      title: '  Prayer Night  ',
-      startsAt: '2026-11-06T19:00',
-      endsAt: '2026-11-06T20:00',
-      location: '  Chapel  ',
-    });
-    form.submit();
-    fixture.detectChanges();
-
-    const element: HTMLElement = fixture.nativeElement;
-    expect(element.querySelectorAll('app-service-event-card')).toHaveLength(3);
-    expect(element.querySelector('.creation-status')?.textContent).toContain(
-      'Prayer Night was added to the schedule.',
-    );
   });
 });

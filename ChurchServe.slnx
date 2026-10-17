@@ -27,6 +27,7 @@
   <Folder Name="/src/app/">
     <File Path="src\app\app.config.ts" />
     <File Path="src\app\app.html" />
+    <File Path="src\app\app.routes.spec.ts" />
     <File Path="src\app\app.routes.ts" />
     <File Path="src\app\app.scss" />
     <File Path="src\app\app.spec.ts" />
@@ -34,6 +35,11 @@
   </Folder>
   <Folder Name="/src/app/features/">
     <File Path="src\app\features\placeholder-page.scss" />
+  </Folder>
+  <Folder Name="/src/app/features/not-found/">
+    <File Path="src\app\features\not-found\not-found.html" />
+    <File Path="src\app\features\not-found\not-found.scss" />
+    <File Path="src\app\features\not-found\not-found.ts" />
   </Folder>
   <Folder Name="/src/app/features/home/">
     <File Path="src\app\features\home\home.html" />
@@ -50,7 +56,20 @@
     <File Path="src\app\features\schedule\schedule.scss" />
     <File Path="src\app\features\schedule\schedule.spec.ts" />
     <File Path="src\app\features\schedule\schedule.ts" />
+    <File Path="src\app\features\schedule\service-event-store.spec.ts" />
+    <File Path="src\app\features\schedule\service-event-store.ts" />
     <File Path="src\app\features\schedule\service-event.ts" />
+  </Folder>
+  <Folder Name="/src/app/features/schedule/service-event-create/">
+    <File Path="src\app\features\schedule\service-event-create\service-event-create.html" />
+    <File Path="src\app\features\schedule\service-event-create\service-event-create.scss" />
+    <File Path="src\app\features\schedule\service-event-create\service-event-create.spec.ts" />
+    <File Path="src\app\features\schedule\service-event-create\service-event-create.ts" />
+  </Folder>
+  <Folder Name="/src/app/features/schedule/service-event-detail/">
+    <File Path="src\app\features\schedule\service-event-detail\service-event-detail.html" />
+    <File Path="src\app\features\schedule\service-event-detail\service-event-detail.scss" />
+    <File Path="src\app\features\schedule\service-event-detail\service-event-detail.ts" />
   </Folder>
   <Folder Name="/src/app/features/schedule/service-event-form/">
     <File Path="src\app\features\schedule\service-event-form\service-event-form.html" />

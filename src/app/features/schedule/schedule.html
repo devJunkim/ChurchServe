@@ -6,6 +6,10 @@
     in later parts of the tutorial.
   </p>
 
+  <div class="schedule-actions">
+    <a routerLink="/schedule/new">Create service</a>
+  </div>
+
   @switch (state().status) {
     @case ('loading') {
       <p class="state-panel" role="status">Loading service schedule…</p>
@@ -20,15 +24,9 @@
     }
 
     @case ('ready') {
-      <app-service-event-form (submitted)="createEvent($event)" />
-
-      @if (submissionMessage()) {
-        <p class="creation-status" role="status">{{ submissionMessage() }}</p>
-      }
-
       <div class="event-grid">
         @for (event of events(); track event.id) {
-          <app-service-event-card [event]="event" (selected)="selectEvent($event)" />
+          <app-service-event-card [event]="event" />
         } @empty {
           <section class="state-panel empty-state">
             <h2>No upcoming services</h2>
@@ -37,12 +35,5 @@
         }
       </div>
     }
-  }
-
-  @if (selectedEvent(); as event) {
-    <p class="selection-status" role="status">
-      <strong>{{ event.title }}</strong> selected. Detailed scheduling will be added in a later
-      part.
-    </p>
   }
 </section>
