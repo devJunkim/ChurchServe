@@ -1,4 +1,5 @@
 using ChurchServe.Api.ServiceEvents;
+using ChurchServe.Api.Volunteers;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChurchServe.Api.Data;
@@ -7,6 +8,8 @@ public sealed class ChurchServeDbContext(DbContextOptions<ChurchServeDbContext> 
     : DbContext(options)
 {
   public DbSet<ServiceEvent> ServiceEvents => Set<ServiceEvent>();
+  public DbSet<Volunteer> Volunteers => Set<Volunteer>();
+  public DbSet<VolunteerMinistry> VolunteerMinistries => Set<VolunteerMinistry>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
@@ -16,5 +19,21 @@ public sealed class ChurchServeDbContext(DbContextOptions<ChurchServeDbContext> 
     serviceEvent.Property(item => item.Id).HasMaxLength(64);
     serviceEvent.Property(item => item.Title).HasMaxLength(200);
     serviceEvent.Property(item => item.Location).HasMaxLength(200);
+
+    var volunteer = modelBuilder.Entity<Volunteer>();
+    volunteer.ToTable("Volunteers");
+    volunteer.HasKey(item => item.Id);
+    volunteer.Property(item => item.Id).HasMaxLength(64);
+    volunteer.Property(item => item.DisplayName).HasMaxLength(200);
+
+    var eligibility = modelBuilder.Entity<VolunteerMinistry>();
+    eligibility.ToTable("VolunteerMinistries");
+    eligibility.HasKey(item => new { item.VolunteerId, item.Ministry });
+    eligibility.Property(item => item.VolunteerId).HasMaxLength(64);
+    eligibility.Property(item => item.Ministry).HasMaxLength(100);
+    eligibility.HasOne(item => item.Volunteer)
+        .WithMany(item => item.EligibleMinistries)
+        .HasForeignKey(item => item.VolunteerId)
+        .OnDelete(DeleteBehavior.Cascade);
   }
 }

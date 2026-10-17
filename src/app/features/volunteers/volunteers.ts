@@ -1,9 +1,78 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import {
+  catchError,
+  distinctUntilChanged,
+  map,
+  merge,
+  Observable,
+  of,
+  shareReplay,
+  startWith,
+  Subject,
+  switchMap,
+  timer,
+} from 'rxjs';
+import { Volunteer } from './volunteer';
+import { VolunteerRepository } from './volunteer-repository';
+
+export type VolunteerSearchState =
+  | { status: 'idle'; volunteers: readonly Volunteer[] }
+  | { status: 'loading'; volunteers: readonly Volunteer[] }
+  | { status: 'loaded'; volunteers: readonly Volunteer[] }
+  | { status: 'failed'; volunteers: readonly Volunteer[]; message: string };
 
 @Component({
   selector: 'app-volunteers',
+  imports: [AsyncPipe, ReactiveFormsModule],
   templateUrl: './volunteers.html',
-  styleUrl: '../placeholder-page.scss',
+  styleUrl: './volunteers.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Volunteers {}
+export class Volunteers {
+  private readonly repository = inject(VolunteerRepository);
+  private readonly retryRequested = new Subject<void>();
+
+  protected readonly query = new FormControl('', { nonNullable: true });
+
+  private readonly queryChanges = this.query.valueChanges.pipe(
+    startWith(this.query.value),
+    map(normalizeQuery),
+    distinctUntilChanged(),
+  );
+
+  protected readonly results$: Observable<VolunteerSearchState> = merge(
+    this.queryChanges,
+    this.retryRequested.pipe(map(() => normalizeQuery(this.query.value))),
+  ).pipe(
+    switchMap((query) =>
+      query.length < 2
+        ? of<VolunteerSearchState>({ status: 'idle', volunteers: [] })
+        : timer(250).pipe(
+            switchMap(() =>
+              this.repository.search(query).pipe(
+                map((volunteers): VolunteerSearchState => ({ status: 'loaded', volunteers })),
+                startWith<VolunteerSearchState>({ status: 'loading', volunteers: [] }),
+                catchError(() =>
+                  of<VolunteerSearchState>({
+                    status: 'failed',
+                    volunteers: [],
+                    message: 'Volunteer search is unavailable. Try again.',
+                  }),
+                ),
+              ),
+            ),
+          ),
+    ),
+    shareReplay({ bufferSize: 1, refCount: true }),
+  );
+
+  protected retrySearch(): void {
+    this.retryRequested.next();
+  }
+}
+
+function normalizeQuery(value: string): string {
+  return value.trim().replace(/\s+/g, ' ');
+}

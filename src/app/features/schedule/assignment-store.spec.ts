@@ -1,4 +1,5 @@
-import { Assignment, MinistryPosition, Volunteer } from './assignment';
+import { Volunteer } from '../volunteers/volunteer';
+import { Assignment, MinistryPosition } from './assignment';
 import { AssignmentStore, validateAssignment } from './assignment-store';
 
 describe('validateAssignment', () => {
