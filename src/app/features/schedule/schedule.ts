@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ServiceEventCard } from './service-event-card/service-event-card';
-import { ServiceEventStore } from './service-event-store';
+import { ServiceEventRepository } from './service-event-repository';
 import { ServiceEvent } from './service-event';
 
 export type ScheduleState =
@@ -17,7 +17,7 @@ export type ScheduleState =
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Schedule {
-  private readonly store = inject(ServiceEventStore);
+  private readonly repository = inject(ServiceEventRepository);
 
   protected readonly state = signal<ScheduleState>({ status: 'loading' });
 
@@ -36,7 +36,7 @@ export class Schedule {
   }
 
   protected reload(): void {
-    this.replaceState({ status: 'ready', events: this.store.events() });
+    this.replaceState({ status: 'ready', events: this.repository.list() });
   }
 
   setStateForTest(state: ScheduleState): void {

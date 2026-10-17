@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { CreateServiceEventCommand } from './create-service-event-command';
+import { ServiceEventRepository } from './service-event-repository';
 import { ServiceEvent } from './service-event';
 
 const initialEvents: readonly ServiceEvent[] = [
@@ -23,11 +24,13 @@ const initialEvents: readonly ServiceEvent[] = [
   },
 ];
 
-@Injectable({ providedIn: 'root' })
-export class ServiceEventStore {
+@Injectable()
+export class InMemoryServiceEventRepository extends ServiceEventRepository {
   private readonly eventsState = signal<readonly ServiceEvent[]>(initialEvents);
 
-  readonly events = this.eventsState.asReadonly();
+  list(): readonly ServiceEvent[] {
+    return this.eventsState();
+  }
 
   findById(id: string): ServiceEvent | undefined {
     return this.eventsState().find((event) => event.id === id);

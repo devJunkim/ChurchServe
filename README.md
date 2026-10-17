@@ -4,11 +4,13 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 6: Routing and Service Detail Pages**.
+This repository currently represents **Part 7: Services and a Repository Boundary**.
 It contains an accessible application frame, explicit schedule request states,
 reusable event cards, typed service-event forms, and bookmarkable create and detail routes
-with explicit missing-page behavior. Later parts will extend these same features rather
-than replace them with disconnected examples.
+with explicit missing-page behavior. Components now depend on a focused service-event
+repository contract supplied by Angular dependency injection, while an in-memory
+implementation preserves the current behavior. Later parts can replace that implementation
+without rewriting the schedule screens.
 
 ## Pinned toolchain
 
@@ -31,17 +33,17 @@ npm start
 Open `http://localhost:4201/`. The development server reloads the page when a
 source file changes.
 
-## Verify Part 6
+## Verify Part 7
 
 ```bash
 npm test -- --watch=false
 npm run build
 ```
 
-The tests protect the application shell, route table, detail lookup, missing-page
-behavior, reusable event-card links, schedule request states, assignment state,
-typed form validation, and create-to-detail navigation. The production build verifies
-strict TypeScript and Angular template compilation across every lazy feature route.
+The tests protect the application shell, route table, repository lookup and creation,
+missing-page behavior, reusable event-card links, schedule request states, assignment
+state, typed form validation, and create-to-detail navigation. The production build
+verifies strict TypeScript and Angular template compilation across every lazy feature route.
 
 ## Current structure
 
@@ -53,10 +55,11 @@ src/app/
       assignment.ts
       assignment-store.ts
       create-service-event-command.ts
+      in-memory-service-event-repository.ts
+      service-event-repository.ts
       service-event-create/
       service-event-detail/
       service-event-form/
-      service-event-store.ts
     volunteers/
   app.config.ts
   app.html

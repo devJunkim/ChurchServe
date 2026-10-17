@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CreateServiceEventCommand } from '../create-service-event-command';
 import { ServiceEventForm } from '../service-event-form/service-event-form';
-import { ServiceEventStore } from '../service-event-store';
+import { ServiceEventRepository } from '../service-event-repository';
 
 @Component({
   selector: 'app-service-event-create',
@@ -13,10 +13,10 @@ import { ServiceEventStore } from '../service-event-store';
 })
 export class ServiceEventCreate {
   private readonly router = inject(Router);
-  private readonly store = inject(ServiceEventStore);
+  private readonly repository = inject(ServiceEventRepository);
 
   protected createEvent(command: CreateServiceEventCommand): void {
-    const event = this.store.create(command);
+    const event = this.repository.create(command);
     void this.router.navigate(['/schedule', event.id]);
   }
 }

@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
-import { ServiceEventStore } from '../service-event-store';
+import { ServiceEventRepository } from '../service-event-repository';
 
 @Component({
   selector: 'app-service-event-detail',
@@ -14,7 +14,7 @@ import { ServiceEventStore } from '../service-event-store';
 })
 export class ServiceEventDetail {
   private readonly route = inject(ActivatedRoute);
-  private readonly store = inject(ServiceEventStore);
+  private readonly repository = inject(ServiceEventRepository);
 
   private readonly eventId = toSignal(
     this.route.paramMap.pipe(map((params) => params.get('eventId'))),
@@ -23,7 +23,7 @@ export class ServiceEventDetail {
 
   protected readonly event = computed(() => {
     const id = this.eventId();
-    return id ? this.store.findById(id) : undefined;
+    return id ? this.repository.findById(id) : undefined;
   });
 
   protected readonly openPositions = computed(() => {
