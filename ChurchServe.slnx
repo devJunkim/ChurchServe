@@ -45,11 +45,18 @@
     <File Path="src\app\features\schedule\assignment-store.spec.ts" />
     <File Path="src\app\features\schedule\assignment-store.ts" />
     <File Path="src\app\features\schedule\assignment.ts" />
+    <File Path="src\app\features\schedule\create-service-event-command.ts" />
     <File Path="src\app\features\schedule\schedule.html" />
     <File Path="src\app\features\schedule\schedule.scss" />
     <File Path="src\app\features\schedule\schedule.spec.ts" />
     <File Path="src\app\features\schedule\schedule.ts" />
     <File Path="src\app\features\schedule\service-event.ts" />
+  </Folder>
+  <Folder Name="/src/app/features/schedule/service-event-form/">
+    <File Path="src\app\features\schedule\service-event-form\service-event-form.html" />
+    <File Path="src\app\features\schedule\service-event-form\service-event-form.scss" />
+    <File Path="src\app\features\schedule\service-event-form\service-event-form.spec.ts" />
+    <File Path="src\app\features\schedule\service-event-form\service-event-form.ts" />
   </Folder>
   <Folder Name="/src/app/features/schedule/service-event-card/">
     <File Path="src\app\features\schedule\service-event-card\service-event-card.html" />

@@ -1,0 +1,85 @@
+<section class="event-form-panel" aria-labelledby="event-form-heading">
+  <div class="form-heading">
+    <p class="eyebrow">New event</p>
+    <h2 id="event-form-heading">Create a service</h2>
+    <p>Enter the service details now. Staffing positions can be added in a later step.</p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="field field-wide">
+      <label for="service-title">Service name</label>
+      <input
+        id="service-title"
+        type="text"
+        formControlName="title"
+        maxlength="120"
+        autocomplete="off"
+        aria-describedby="service-title-error"
+        [attr.aria-invalid]="form.controls.title.touched && form.controls.title.invalid"
+      />
+      @if (form.controls.title.touched && form.controls.title.invalid) {
+        <p id="service-title-error" class="field-error">Enter a service name.</p>
+      }
+    </div>
+
+    <div class="field">
+      <label for="service-start">Starts</label>
+      <input
+        id="service-start"
+        type="datetime-local"
+        formControlName="startsAt"
+        aria-describedby="service-time-zone service-time-error"
+        [attr.aria-invalid]="form.controls.startsAt.touched && form.controls.startsAt.invalid"
+      />
+      @if (form.controls.startsAt.touched && form.controls.startsAt.invalid) {
+        <p class="field-error">Enter a valid start date and time.</p>
+      }
+    </div>
+
+    <div class="field">
+      <label for="service-end">Ends</label>
+      <input
+        id="service-end"
+        type="datetime-local"
+        formControlName="endsAt"
+        aria-describedby="service-time-zone service-time-error"
+        [attr.aria-invalid]="form.controls.endsAt.touched && form.controls.endsAt.invalid"
+      />
+      @if (form.controls.endsAt.touched && form.controls.endsAt.invalid) {
+        <p class="field-error">Enter a valid end date and time.</p>
+      }
+    </div>
+
+    <p id="service-time-zone" class="field-help field-wide">
+      Times are interpreted in this device's time zone: {{ deviceTimeZone }}.
+    </p>
+
+    @if (
+      (form.controls.startsAt.touched || form.controls.endsAt.touched) && form.hasError('timeRange')
+    ) {
+      <p id="service-time-error" class="field-error field-wide" role="alert">
+        End time must be after start time.
+      </p>
+    }
+
+    <div class="field field-wide">
+      <label for="service-location">Location</label>
+      <input
+        id="service-location"
+        type="text"
+        formControlName="location"
+        maxlength="120"
+        autocomplete="off"
+        aria-describedby="service-location-error"
+        [attr.aria-invalid]="form.controls.location.touched && form.controls.location.invalid"
+      />
+      @if (form.controls.location.touched && form.controls.location.invalid) {
+        <p id="service-location-error" class="field-error">Enter a service location.</p>
+      }
+    </div>
+
+    <div class="form-actions field-wide">
+      <button type="submit">Add to schedule</button>
+    </div>
+  </form>
+</section>

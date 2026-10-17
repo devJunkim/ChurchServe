@@ -4,11 +4,11 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 4: Signals and Volunteer Assignment State**.
+This repository currently represents **Part 5: Typed Reactive Forms and Validation**.
 It contains an accessible application frame, explicit schedule request states,
-reusable event cards, and signal-backed volunteer assignment state with pure domain
-validation. Later parts will extend these same features rather than replace them
-with disconnected examples.
+reusable event cards, signal-backed volunteer assignment state, and a typed service-event
+form with field and cross-field validation. Later parts will extend these same features
+rather than replace them with disconnected examples.
 
 ## Pinned toolchain
 
@@ -31,7 +31,7 @@ npm start
 Open `http://localhost:4201/`. The development server reloads the page when a
 source file changes.
 
-## Verify Part 4
+## Verify Part 5
 
 ```bash
 npm test -- --watch=false
@@ -39,9 +39,9 @@ npm run build
 ```
 
 The tests protect the application shell, reusable event-card contract, schedule
-request states, stable list identity, assignment validation, immutable updates,
-and computed open positions. The production build verifies strict TypeScript and
-Angular template compilation, including the lazy feature routes.
+request states, stable list identity, assignment state, typed form validation,
+command normalization, and schedule integration. The production build verifies
+strict TypeScript and Angular template compilation, including the lazy feature routes.
 
 ## Current structure
 
@@ -52,6 +52,8 @@ src/app/
     schedule/
       assignment.ts
       assignment-store.ts
+      create-service-event-command.ts
+      service-event-form/
     volunteers/
   app.config.ts
   app.html

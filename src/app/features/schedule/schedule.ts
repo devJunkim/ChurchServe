@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { CreateServiceEventCommand } from './create-service-event-command';
 import { ServiceEventCard } from './service-event-card/service-event-card';
+import { ServiceEventForm } from './service-event-form/service-event-form';
 import { ServiceEvent } from './service-event';
 
 export type ScheduleState =
@@ -30,7 +32,7 @@ const scheduledEvents: readonly ServiceEvent[] = [
 
 @Component({
   selector: 'app-schedule',
-  imports: [ServiceEventCard],
+  imports: [ServiceEventCard, ServiceEventForm],
   templateUrl: './schedule.html',
   styleUrl: './schedule.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,6 +41,8 @@ export class Schedule {
   protected readonly state = signal<ScheduleState>({ status: 'loading' });
 
   private readonly selectedEventId = signal<string | null>(null);
+
+  protected readonly submissionMessage = signal('');
 
   protected readonly errorMessage = computed(() => {
     const current = this.state();
@@ -62,6 +66,23 @@ export class Schedule {
     this.selectedEventId.set(id);
   }
 
+  protected createEvent(command: CreateServiceEventCommand): void {
+    const current = this.state();
+    if (current.status !== 'ready') {
+      return;
+    }
+
+    const event: ServiceEvent = {
+      id: crypto.randomUUID(),
+      ...command,
+      requiredPositions: 0,
+      assignedPositions: 0,
+    };
+
+    this.state.set({ status: 'ready', events: [...current.events, event] });
+    this.submissionMessage.set(`${event.title} was added to the schedule.`);
+  }
+
   protected reload(): void {
     this.replaceState({ status: 'ready', events: scheduledEvents });
   }
@@ -72,6 +93,7 @@ export class Schedule {
 
   private replaceState(state: ScheduleState): void {
     this.selectedEventId.set(null);
+    this.submissionMessage.set('');
     this.state.set(state);
   }
 }

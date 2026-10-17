@@ -40,6 +40,15 @@ h1 {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
 }
 
+.creation-status {
+  margin: 1rem 0 0;
+  padding: 0.85rem 1rem;
+  border-left: 4px solid #087f5b;
+  background: #e6fcf5;
+  color: #245448;
+  line-height: 1.5;
+}
+
 .state-panel {
   margin: 2.5rem 0 0;
   padding: 1.25rem;
