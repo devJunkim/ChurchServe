@@ -1,0 +1,39 @@
+<main class="sign-in-page" aria-labelledby="sign-in-heading">
+  <a routerLink="/" class="back-link">← Back to home</a>
+  <p class="eyebrow">Coordinator access</p>
+  <h1 id="sign-in-heading">Sign in to ChurchServe</h1>
+  <p class="introduction">Use your coordinator account to manage schedules and volunteers.</p>
+
+  <form [formGroup]="form" (ngSubmit)="signIn()">
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="username" formControlName="email" />
+    @if (form.controls.email.touched && form.controls.email.invalid) {
+      <p class="field-error">Enter a valid email address.</p>
+    }
+
+    <label for="password">Password</label>
+    <input
+      id="password"
+      type="password"
+      autocomplete="current-password"
+      formControlName="password"
+    />
+    @if (form.controls.password.touched && form.controls.password.invalid) {
+      <p class="field-error">Enter your password.</p>
+    }
+
+    <button type="submit" [disabled]="isSubmitting()">
+      {{ isSubmitting() ? 'Signing in…' : 'Sign in' }}
+    </button>
+  </form>
+
+  @if (errorMessage()) {
+    <p class="sign-in-error" role="alert">{{ errorMessage() }}</p>
+  }
+
+  <aside class="demo-account" aria-label="Development account">
+    <strong>Local tutorial account</strong>
+    <span>coordinator@churchserve.local</span>
+    <span>Use the password configured in .NET user-secrets.</span>
+  </aside>
+</main>

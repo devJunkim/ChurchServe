@@ -1,12 +1,31 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
+import { SessionStore } from './core/auth/session-store';
 import { App } from './app';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        {
+          provide: SessionStore,
+          useValue: {
+            session: signal({
+              status: 'authenticated',
+              user: {
+                id: 'coordinator-1',
+                email: 'coordinator@churchserve.local',
+                displayName: 'Demo Coordinator',
+                roles: ['scheduler'],
+              },
+            }),
+            signOut: () => of(undefined),
+          },
+        },
+      ],
     }).compileComponents();
   });
 
@@ -28,3 +47,4 @@ describe('App', () => {
     expect(link?.getAttribute('href')).toBe('#main-content');
   });
 });
+import { signal } from '@angular/core';

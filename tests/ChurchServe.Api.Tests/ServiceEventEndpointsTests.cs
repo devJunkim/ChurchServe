@@ -10,7 +10,7 @@ public sealed class ServiceEventEndpointsTests
   public async Task List_returns_seeded_service_events()
   {
     using var factory = new ChurchServeApiFactory();
-    using var client = factory.CreateClient();
+    using var client = await factory.CreateAuthenticatedClientAsync();
 
     var response = await client.GetAsync("/api/service-events");
     var page = await response.Content.ReadFromJsonAsync<ServiceEventPageResponse>();
@@ -26,7 +26,7 @@ public sealed class ServiceEventEndpointsTests
   public async Task List_filters_by_month_and_ministry()
   {
     using var factory = new ChurchServeApiFactory();
-    using var client = factory.CreateClient();
+    using var client = await factory.CreateAuthenticatedClientAsync();
 
     var page = await client.GetFromJsonAsync<ServiceEventPageResponse>(
         "/api/service-events?month=2026-11&ministry=technical&page=1&pageSize=4");
@@ -40,7 +40,7 @@ public sealed class ServiceEventEndpointsTests
   public async Task List_returns_stable_paging_metadata()
   {
     using var factory = new ChurchServeApiFactory();
-    using var client = factory.CreateClient();
+    using var client = await factory.CreateAuthenticatedClientAsync();
 
     var page = await client.GetFromJsonAsync<ServiceEventPageResponse>(
         "/api/service-events?month=2026-11&page=2&pageSize=1");
@@ -59,7 +59,7 @@ public sealed class ServiceEventEndpointsTests
   public async Task List_rejects_invalid_query_values(string url)
   {
     using var factory = new ChurchServeApiFactory();
-    using var client = factory.CreateClient();
+    using var client = await factory.CreateAuthenticatedClientAsync();
 
     var response = await client.GetAsync(url);
 
@@ -70,7 +70,7 @@ public sealed class ServiceEventEndpointsTests
   public async Task Detail_returns_not_found_for_an_unknown_id()
   {
     using var factory = new ChurchServeApiFactory();
-    using var client = factory.CreateClient();
+    using var client = await factory.CreateAuthenticatedClientAsync();
 
     var response = await client.GetAsync("/api/service-events/missing");
 
@@ -81,7 +81,7 @@ public sealed class ServiceEventEndpointsTests
   public async Task Create_persists_and_returns_a_service_event()
   {
     using var factory = new ChurchServeApiFactory();
-    using var client = factory.CreateClient();
+    using var client = await factory.CreateAuthenticatedClientAsync();
     var request = new CreateServiceEventRequest(
         "Christmas Eve Service",
         DateTimeOffset.Parse("2026-12-24T18:00:00-05:00"),
@@ -105,7 +105,7 @@ public sealed class ServiceEventEndpointsTests
   public async Task Create_rejects_an_end_time_before_the_start_time()
   {
     using var factory = new ChurchServeApiFactory();
-    using var client = factory.CreateClient();
+    using var client = await factory.CreateAuthenticatedClientAsync();
     var request = new CreateServiceEventRequest(
         "Invalid event",
         DateTimeOffset.Parse("2026-12-24T19:30:00-05:00"),

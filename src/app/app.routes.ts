@@ -8,6 +8,11 @@ export const routes: Routes = [
     title: 'ChurchServe | Ministry scheduling',
   },
   {
+    path: 'sign-in',
+    loadComponent: () => import('./features/sign-in/sign-in').then((module) => module.SignIn),
+    title: 'Sign in | ChurchServe',
+  },
+  {
     path: 'schedule',
     loadComponent: () => import('./features/schedule/schedule').then((module) => module.Schedule),
     title: 'Schedule | ChurchServe',

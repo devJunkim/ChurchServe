@@ -59,6 +59,45 @@ nav {
   gap: 0.35rem;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.current-user,
+.session-status {
+  color: #52667a;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.sign-in,
+.sign-out {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #087f5b;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: #087f5b;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.sign-in:hover,
+.sign-out:hover {
+  background: #e6fcf5;
+}
+
+.session-error {
+  margin: 0;
+  padding: 0.75rem clamp(1rem, 4vw, 4rem);
+  background: #fff5f5;
+  color: #9b2c2c;
+  text-align: right;
+}
+
 nav a {
   padding: 0.65rem 0.85rem;
   border-radius: 0.5rem;
@@ -74,7 +113,9 @@ nav a.active {
 }
 
 nav a:focus-visible,
-.brand:focus-visible {
+.brand:focus-visible,
+.sign-in:focus-visible,
+.sign-out:focus-visible {
   outline: 3px solid #74c0fc;
   outline-offset: 3px;
 }
@@ -99,5 +140,10 @@ main {
     align-items: flex-start;
     flex-direction: column;
     gap: 0.75rem;
+  }
+
+  .header-actions {
+    align-items: flex-start;
+    flex-wrap: wrap;
   }
 }

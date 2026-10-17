@@ -1,3 +1,4 @@
+using ChurchServe.Api.Authentication;
 using ChurchServe.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
@@ -6,11 +7,11 @@ namespace ChurchServe.Api.ServiceEvents;
 
 public static class ServiceEventEndpoints
 {
-  public static IEndpointRouteBuilder MapServiceEventEndpoints(this IEndpointRouteBuilder endpoints)
+  public static RouteGroupBuilder MapServiceEventEndpoints(this IEndpointRouteBuilder endpoints)
   {
     var group = endpoints.MapGroup("/api/service-events");
 
-    group.MapGet("/", async (
+    group.MapGet("", async (
         string? month,
         string? ministry,
         int? page,
@@ -74,7 +75,7 @@ public static class ServiceEventEndpoints
               : Results.Ok(ToResponse(serviceEvent));
     });
 
-    group.MapPost("/", async (CreateServiceEventRequest request, ChurchServeDbContext dbContext) =>
+    group.MapPost("", async (CreateServiceEventRequest request, ChurchServeDbContext dbContext) =>
     {
       var errors = Validate(request);
       if (errors.Count > 0)
@@ -100,9 +101,9 @@ public static class ServiceEventEndpoints
       return Results.Created(
               $"/api/service-events/{Uri.EscapeDataString(serviceEvent.Id)}",
               ToResponse(serviceEvent));
-    });
+    }).ValidateAntiforgery();
 
-    return endpoints;
+    return group;
   }
 
   private static Dictionary<string, string[]> Validate(CreateServiceEventRequest request)

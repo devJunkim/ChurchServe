@@ -2,9 +2,10 @@ namespace ChurchServe.Api.Volunteers;
 
 public static class VolunteerEndpoints
 {
-  public static IEndpointRouteBuilder MapVolunteerEndpoints(this IEndpointRouteBuilder endpoints)
+  public static RouteGroupBuilder MapVolunteerEndpoints(this IEndpointRouteBuilder endpoints)
   {
-    endpoints.MapGet("/api/volunteers", async (
+    var group = endpoints.MapGroup("/api/volunteers");
+    group.MapGet("", async (
         string? query,
         VolunteerDirectory directory,
         CancellationToken cancellationToken) =>
@@ -15,6 +16,6 @@ public static class VolunteerEndpoints
           : Results.Ok(await directory.SearchAsync(normalizedQuery, cancellationToken));
     });
 
-    return endpoints;
+    return group;
   }
 }
