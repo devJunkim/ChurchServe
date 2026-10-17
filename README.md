@@ -4,11 +4,11 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 1: Create the Application Shell**.
-It contains an accessible application frame, lazy home, schedule, and volunteer
-routes, responsive styling, and the first user-visible unit tests. Later parts
-will extend these same features rather than replace them with disconnected
-examples.
+This repository currently represents **Part 3: Control Flow and Schedule States**.
+It contains an accessible application frame, lazy feature routes, reusable service
+event cards, and explicit loading, error, empty, and populated schedule states.
+Later parts will extend these same features rather than replace them with
+disconnected examples.
 
 ## Pinned toolchain
 
@@ -28,19 +28,20 @@ npm ci
 npm start
 ```
 
-Open `http://localhost:4200/`. The development server reloads the page when a
+Open `http://localhost:4201/`. The development server reloads the page when a
 source file changes.
 
-## Verify Part 1
+## Verify Part 3
 
 ```bash
 npm test -- --watch=false
 npm run build
 ```
 
-The tests protect the ChurchServe identity, primary navigation, skip link, and
-home-page purpose. The production build verifies strict TypeScript and Angular
-template compilation, including the lazy feature routes.
+The tests protect the application shell, reusable event-card contract, schedule
+selection, mutually exclusive request states, retry behavior, and stable list
+identity. The production build verifies strict TypeScript and Angular template
+compilation, including the lazy feature routes.
 
 ## Current structure
 
