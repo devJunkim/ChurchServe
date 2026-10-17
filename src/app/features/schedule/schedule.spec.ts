@@ -1,17 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { InMemoryServiceEventRepository } from './in-memory-service-event-repository';
+import { provideLocalPersistence } from './persistence/provide-local-persistence';
 import { Schedule } from './schedule';
-import { ServiceEventRepository } from './service-event-repository';
 import { ServiceEvent } from './service-event';
 
 describe('Schedule', () => {
   beforeEach(() => {
+    localStorage.clear();
     TestBed.configureTestingModule({
-      providers: [
-        provideRouter([]),
-        { provide: ServiceEventRepository, useClass: InMemoryServiceEventRepository },
-      ],
+      providers: [provideRouter([]), provideLocalPersistence()],
     });
   });
 

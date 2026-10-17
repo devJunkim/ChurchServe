@@ -8,4 +8,8 @@
   </p>
 
   <app-service-event-form (submitted)="createEvent($event)" />
+
+  @if (saveError()) {
+    <p class="save-error" role="alert">{{ saveError() }}</p>
+  }
 </main>

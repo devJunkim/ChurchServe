@@ -2,19 +2,16 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { NotFound } from './features/not-found/not-found';
-import { InMemoryServiceEventRepository } from './features/schedule/in-memory-service-event-repository';
+import { provideLocalPersistence } from './features/schedule/persistence/provide-local-persistence';
 import { ServiceEventCreate } from './features/schedule/service-event-create/service-event-create';
 import { ServiceEventDetail } from './features/schedule/service-event-detail/service-event-detail';
-import { ServiceEventRepository } from './features/schedule/service-event-repository';
 import { routes } from './app.routes';
 
 describe('application routes', () => {
   beforeEach(() => {
+    localStorage.clear();
     TestBed.configureTestingModule({
-      providers: [
-        provideRouter(routes),
-        { provide: ServiceEventRepository, useClass: InMemoryServiceEventRepository },
-      ],
+      providers: [provideRouter(routes), provideLocalPersistence()],
     });
   });
 
