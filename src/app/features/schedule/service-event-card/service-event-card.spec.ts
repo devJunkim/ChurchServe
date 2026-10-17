@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { ServiceEvent } from '../service-event';
 import { ServiceEventCard } from './service-event-card';
 
@@ -13,6 +14,10 @@ describe('ServiceEventCard', () => {
     assignedPositions: 7,
   };
 
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+  });
+
   it('renders the event and open-position count', () => {
     const fixture = TestBed.createComponent(ServiceEventCard);
     fixture.componentRef.setInput('event', event);
@@ -24,16 +29,12 @@ describe('ServiceEventCard', () => {
     expect(text).toContain('3 open positions');
   });
 
-  it('emits the event ID when selected', () => {
+  it('links to the event detail route', () => {
     const fixture = TestBed.createComponent(ServiceEventCard);
     fixture.componentRef.setInput('event', event);
-    const selected: string[] = [];
-    fixture.componentInstance.selected.subscribe((id) => selected.push(id));
     fixture.detectChanges();
 
-    fixture.nativeElement.querySelector('button').click();
-
-    expect(selected).toEqual(['event-1']);
+    expect(fixture.nativeElement.querySelector('a').getAttribute('href')).toBe('/schedule/event-1');
   });
 
   it('shows when an event is fully staffed', () => {

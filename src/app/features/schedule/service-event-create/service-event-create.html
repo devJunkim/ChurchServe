@@ -1,0 +1,11 @@
+<main class="create-page" aria-labelledby="create-heading">
+  <a routerLink="/schedule" class="back-link">← Back to schedule</a>
+  <p class="eyebrow">Schedule</p>
+  <h1 id="create-heading">Create a service event</h1>
+  <p class="introduction">
+    Add the service details. After validation succeeds, ChurchServe opens the new event's stable
+    detail URL.
+  </p>
+
+  <app-service-event-form (submitted)="createEvent($event)" />
+</main>

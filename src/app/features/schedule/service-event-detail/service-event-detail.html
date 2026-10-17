@@ -1,0 +1,51 @@
+<main class="detail-page" aria-labelledby="detail-heading">
+  <a routerLink="/schedule" class="back-link">← Back to schedule</a>
+
+  @if (event(); as serviceEvent) {
+    <p class="eyebrow">Service event</p>
+    <h1 id="detail-heading">{{ serviceEvent.title }}</h1>
+
+    <dl class="event-details">
+      <div>
+        <dt>Starts</dt>
+        <dd>
+          <time [attr.datetime]="serviceEvent.startsAt">
+            {{ serviceEvent.startsAt | date: 'full' }}
+          </time>
+        </dd>
+      </div>
+      <div>
+        <dt>Ends</dt>
+        <dd>
+          <time [attr.datetime]="serviceEvent.endsAt">
+            {{ serviceEvent.endsAt | date: 'full' }}
+          </time>
+        </dd>
+      </div>
+      <div>
+        <dt>Location</dt>
+        <dd>{{ serviceEvent.location }}</dd>
+      </div>
+      <div>
+        <dt>Staffing</dt>
+        <dd>
+          @if (serviceEvent.requiredPositions === 0) {
+            No positions configured
+          } @else if (openPositions() === 0) {
+            Fully staffed
+          } @else {
+            {{ openPositions() }} open
+            {{ openPositions() === 1 ? 'position' : 'positions' }}
+          }
+        </dd>
+      </div>
+    </dl>
+  } @else {
+    <section class="missing-event" role="alert">
+      <p class="eyebrow">Service event</p>
+      <h1 id="detail-heading">Service not found</h1>
+      <p>This event does not exist or is no longer available.</p>
+      <a routerLink="/schedule">Return to the schedule</a>
+    </section>
+  }
+</main>

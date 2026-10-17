@@ -13,10 +13,31 @@ export const routes: Routes = [
     title: 'Schedule | ChurchServe',
   },
   {
+    path: 'schedule/new',
+    loadComponent: () =>
+      import('./features/schedule/service-event-create/service-event-create').then(
+        (module) => module.ServiceEventCreate,
+      ),
+    title: 'Create service | ChurchServe',
+  },
+  {
+    path: 'schedule/:eventId',
+    loadComponent: () =>
+      import('./features/schedule/service-event-detail/service-event-detail').then(
+        (module) => module.ServiceEventDetail,
+      ),
+    title: 'Service details | ChurchServe',
+  },
+  {
     path: 'volunteers',
     loadComponent: () =>
       import('./features/volunteers/volunteers').then((module) => module.Volunteers),
     title: 'Volunteers | ChurchServe',
   },
-  { path: '**', redirectTo: '' },
+  {
+    path: 'not-found',
+    loadComponent: () => import('./features/not-found/not-found').then((module) => module.NotFound),
+    title: 'Page not found | ChurchServe',
+  },
+  { path: '**', redirectTo: 'not-found' },
 ];

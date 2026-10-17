@@ -23,7 +23,11 @@
     </p>
   }
 
-  <button type="button" (click)="selectEvent()" [attr.aria-label]="'View ' + event().title">
+  <a
+    class="card-link"
+    [routerLink]="['/schedule', event().id]"
+    [attr.aria-label]="'View ' + event().title"
+  >
     View schedule
-  </button>
+  </a>
 </article>
