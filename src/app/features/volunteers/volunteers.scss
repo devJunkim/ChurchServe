@@ -1,0 +1,163 @@
+.volunteer-page {
+  display: grid;
+  gap: 2rem;
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: clamp(3rem, 8vw, 6rem) clamp(1.25rem, 5vw, 4rem);
+}
+
+.eyebrow {
+  margin: 0 0 0.75rem;
+  color: #087f5b;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  max-width: 18ch;
+  margin-bottom: 1rem;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.introduction {
+  max-width: 42rem;
+  margin-bottom: 0;
+  color: #52667a;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.search-panel,
+.results {
+  padding: clamp(1.25rem, 4vw, 2rem);
+  border: 1px solid #d7e2e0;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 1rem 2.5rem rgb(16 42 67 / 7%);
+}
+
+.search-panel h2,
+.results h2 {
+  margin-bottom: 1.25rem;
+  font-size: 1.35rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-weight: 750;
+}
+
+input {
+  width: min(100%, 36rem);
+  padding: 0.8rem 0.95rem;
+  border: 1px solid #9fb3c8;
+  border-radius: 0.65rem;
+  color: #102a43;
+  background: #fff;
+}
+
+input:focus-visible,
+button:focus-visible {
+  outline: 3px solid #66d9b7;
+  outline-offset: 2px;
+}
+
+.hint,
+.result-count,
+.request-state {
+  color: #52667a;
+}
+
+.hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+}
+
+.result-count {
+  margin-bottom: 1rem;
+}
+
+.request-state {
+  margin-bottom: 0;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: #f0f7f5;
+}
+
+.error-state {
+  color: #8b1e1e;
+  background: #fff1f1;
+}
+
+.error-state p {
+  margin-bottom: 0.75rem;
+}
+
+button {
+  padding: 0.65rem 1rem;
+  border: 0;
+  border-radius: 0.55rem;
+  color: #fff;
+  background: #087f5b;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.volunteer-list,
+.ministry-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.volunteer-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 1rem;
+}
+
+.volunteer-list > li {
+  padding: 1.25rem;
+  border: 1px solid #d7e2e0;
+  border-radius: 0.85rem;
+}
+
+.volunteer-list h3 {
+  margin-bottom: 0.85rem;
+}
+
+.volunteer-list p {
+  margin-bottom: 0.55rem;
+  color: #52667a;
+  font-size: 0.85rem;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ministry-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.ministry-list li {
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  color: #075c46;
+  background: #dff7ef;
+  font-size: 0.82rem;
+  text-transform: capitalize;
+}

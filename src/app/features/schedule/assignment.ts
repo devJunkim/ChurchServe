@@ -7,12 +7,6 @@ export interface MinistryPosition {
   readonly endsAt: string;
 }
 
-export interface Volunteer {
-  readonly id: string;
-  readonly displayName: string;
-  readonly eligibleMinistries: readonly string[];
-}
-
 export interface Assignment {
   readonly id: string;
   readonly positionId: string;

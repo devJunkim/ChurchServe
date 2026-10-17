@@ -1,8 +1,67 @@
-<section class="placeholder-page">
-  <p class="eyebrow">Volunteers</p>
-  <h1>Coordinate people who serve</h1>
-  <p>
-    Volunteer profiles, ministry eligibility, and availability will grow here as the tutorial
-    continues.
-  </p>
-</section>
+<main class="volunteer-page">
+  <header>
+    <p class="eyebrow">Volunteers</p>
+    <h1>Find the right person to serve</h1>
+    <p class="introduction">
+      Search the volunteer directory by name and review each person’s eligible ministries.
+    </p>
+  </header>
+
+  <section class="search-panel" aria-labelledby="volunteer-search-heading">
+    <h2 id="volunteer-search-heading">Volunteer directory</h2>
+    <label for="volunteer-query">Name</label>
+    <input
+      id="volunteer-query"
+      type="search"
+      autocomplete="off"
+      [formControl]="query"
+      aria-describedby="volunteer-search-hint"
+      placeholder="Try Anna or Morgan"
+    />
+    <p id="volunteer-search-hint" class="hint">Enter at least two characters.</p>
+  </section>
+
+  @if (results$ | async; as state) {
+    <section class="results" aria-labelledby="volunteer-results-heading">
+      <h2 id="volunteer-results-heading">Results</h2>
+
+      @switch (state.status) {
+        @case ('idle') {
+          <p class="request-state">Start typing to search the directory.</p>
+        }
+        @case ('loading') {
+          <p class="request-state" role="status" aria-live="polite">Searching volunteers…</p>
+        }
+        @case ('failed') {
+          <div class="request-state error-state" role="alert">
+            <p>{{ state.message }}</p>
+            <button type="button" (click)="retrySearch()">Try again</button>
+          </div>
+        }
+        @case ('loaded') {
+          @if (state.volunteers.length === 0) {
+            <p class="request-state">No volunteers match that name.</p>
+          } @else {
+            <p class="result-count" role="status">
+              {{ state.volunteers.length }}
+              {{ state.volunteers.length === 1 ? 'volunteer' : 'volunteers' }} found
+            </p>
+            <ul class="volunteer-list">
+              @for (volunteer of state.volunteers; track volunteer.id) {
+                <li>
+                  <h3>{{ volunteer.displayName }}</h3>
+                  <p>Eligible ministries</p>
+                  <ul class="ministry-list" aria-label="Eligible ministries">
+                    @for (ministry of volunteer.eligibleMinistries; track ministry) {
+                      <li>{{ ministry }}</li>
+                    }
+                  </ul>
+                </li>
+              }
+            </ul>
+          }
+        }
+      }
+    </section>
+  }
+</main>

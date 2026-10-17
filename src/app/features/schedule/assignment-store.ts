@@ -1,5 +1,6 @@
 import { computed, signal } from '@angular/core';
-import { Assignment, MinistryPosition, Volunteer } from './assignment';
+import { Volunteer } from '../volunteers/volunteer';
+import { Assignment, MinistryPosition } from './assignment';
 
 export interface AssignmentState {
   readonly positions: readonly MinistryPosition[];
