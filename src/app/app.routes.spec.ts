@@ -20,7 +20,7 @@ describe('application routes', () => {
       assignedPositions: 7,
     };
     const repository = {
-      list: () => of([event]),
+      list: () => of({ items: [event], page: 1, pageSize: 4, totalItems: 1 }),
       findById: (id: string) => of(id === event.id ? event : undefined),
       create: () => of(event),
     };

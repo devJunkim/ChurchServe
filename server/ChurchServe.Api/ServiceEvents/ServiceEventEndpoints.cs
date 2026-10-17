@@ -1,5 +1,6 @@
 using ChurchServe.Api.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace ChurchServe.Api.ServiceEvents;
 
@@ -9,15 +10,57 @@ public static class ServiceEventEndpoints
   {
     var group = endpoints.MapGroup("/api/service-events");
 
-    group.MapGet("/", async (ChurchServeDbContext dbContext) =>
+    group.MapGet("/", async (
+        string? month,
+        string? ministry,
+        int? page,
+        int? pageSize,
+        ChurchServeDbContext dbContext,
+        CancellationToken cancellationToken) =>
     {
-      var serviceEvents = await dbContext.ServiceEvents
-              .AsNoTracking()
-              .ToListAsync();
+      var requestedPage = page.GetValueOrDefault(1);
+      var requestedPageSize = pageSize.GetValueOrDefault(4);
+      var errors = ValidatePaging(requestedPage, requestedPageSize);
+      if (errors.Count > 0)
+      {
+        return Results.ValidationProblem(errors);
+      }
 
-      return Results.Ok(serviceEvents
-              .OrderBy(item => item.StartsAt)
-              .Select(ToResponse));
+      var query = dbContext.ServiceEvents.AsNoTracking();
+
+      if (!string.IsNullOrWhiteSpace(month))
+      {
+        if (!TryGetMonthRange(month, out var monthStart, out var monthEnd))
+        {
+          return Results.ValidationProblem(new Dictionary<string, string[]>
+          {
+            ["month"] = ["Month must use YYYY-MM format."],
+          });
+        }
+
+        query = query.Where(item => item.StartsAt >= monthStart && item.StartsAt < monthEnd);
+      }
+
+      var normalizedMinistry = ministry?.Trim().ToLowerInvariant();
+      if (!string.IsNullOrEmpty(normalizedMinistry))
+      {
+        query = query.Where(item =>
+            item.Ministries.Any(value => value.Ministry == normalizedMinistry));
+      }
+
+      var totalItems = await query.CountAsync(cancellationToken);
+      var serviceEvents = await query
+          .OrderBy(item => item.StartsAt)
+          .ThenBy(item => item.Id)
+          .Skip((requestedPage - 1) * requestedPageSize)
+          .Take(requestedPageSize)
+          .ToArrayAsync(cancellationToken);
+
+      return Results.Ok(new ServiceEventPageResponse(
+          serviceEvents.Select(ToResponse).ToArray(),
+          requestedPage,
+          requestedPageSize,
+          totalItems));
     });
 
     group.MapGet("/{id}", async (string id, ChurchServeDbContext dbContext) =>
@@ -43,8 +86,8 @@ public static class ServiceEventEndpoints
       {
         Id = Guid.NewGuid().ToString("N"),
         Title = request.Title!.Trim(),
-        StartsAt = request.StartsAt,
-        EndsAt = request.EndsAt,
+        StartsAt = request.StartsAt.UtcDateTime,
+        EndsAt = request.EndsAt.UtcDateTime,
         Location = request.Location!.Trim(),
         RequiredPositions = 0,
         AssignedPositions = 0,
@@ -84,14 +127,48 @@ public static class ServiceEventEndpoints
     return errors;
   }
 
+  private static Dictionary<string, string[]> ValidatePaging(int page, int pageSize)
+  {
+    var errors = new Dictionary<string, string[]>();
+    if (page < 1)
+    {
+      errors["page"] = ["Page must be at least 1."];
+    }
+
+    if (pageSize is < 1 or > 50)
+    {
+      errors["pageSize"] = ["Page size must be between 1 and 50."];
+    }
+
+    return errors;
+  }
+
+  private static bool TryGetMonthRange(
+      string month,
+      out DateTime monthStart,
+      out DateTime monthEnd)
+  {
+    var parsed = DateTime.TryParseExact(
+        $"{month}-01",
+        "yyyy-MM-dd",
+        CultureInfo.InvariantCulture,
+        DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+        out monthStart);
+    monthEnd = parsed ? monthStart.AddMonths(1) : default;
+    return parsed;
+  }
+
   private static ServiceEventResponse ToResponse(ServiceEvent serviceEvent) =>
       new(
           serviceEvent.Id,
           serviceEvent.Title,
-          serviceEvent.StartsAt,
-          serviceEvent.EndsAt,
+          AsUtcOffset(serviceEvent.StartsAt),
+          AsUtcOffset(serviceEvent.EndsAt),
           serviceEvent.Location,
           serviceEvent.RequiredPositions,
           serviceEvent.AssignedPositions,
           serviceEvent.Version);
+
+  private static DateTimeOffset AsUtcOffset(DateTime value) =>
+      new(DateTime.SpecifyKind(value, DateTimeKind.Utc));
 }

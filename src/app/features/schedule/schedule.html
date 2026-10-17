@@ -2,13 +2,36 @@
   <p class="eyebrow">Schedule</p>
   <h1 id="schedule-heading">Upcoming services</h1>
   <p class="introduction">
-    Review each event's time, location, and current volunteer coverage. Detailed assignments arrive
-    in later parts of the tutorial.
+    Filter the schedule by month and ministry. The URL keeps your current view shareable and
+    refresh-safe.
   </p>
 
   <div class="schedule-actions">
     <a routerLink="/schedule/new">Create service</a>
   </div>
+
+  <section class="schedule-filters" aria-labelledby="filter-heading">
+    <h2 id="filter-heading">Filter schedule</h2>
+
+    <label>
+      Month
+      <input
+        type="month"
+        [value]="query().month"
+        (change)="changeMonth($any($event.target).value)"
+      />
+    </label>
+
+    <label>
+      Ministry
+      <select [value]="query().ministry ?? ''" (change)="changeMinistry($any($event.target).value)">
+        <option value="">All ministries</option>
+        @for (ministry of ministries; track ministry.value) {
+          <option [value]="ministry.value">{{ ministry.label }}</option>
+        }
+      </select>
+    </label>
+  </section>
 
   @switch (state().status) {
     @case ('loading') {
@@ -29,11 +52,29 @@
           <app-service-event-card [event]="event" />
         } @empty {
           <section class="state-panel empty-state">
-            <h2>No upcoming services</h2>
-            <p>Create an event when the next schedule is ready.</p>
+            <h2>No matching services</h2>
+            <p>Try a different month or ministry.</p>
           </section>
         }
       </div>
+
+      @if (page(); as currentPage) {
+        <nav class="pagination" aria-label="Schedule pages">
+          <button
+            type="button"
+            [disabled]="!hasPreviousPage()"
+            (click)="changePage(query().page - 1)"
+          >
+            Previous
+          </button>
+          <p aria-live="polite">
+            Page {{ currentPage.page }} of {{ totalPages() }} · {{ currentPage.totalItems }} results
+          </p>
+          <button type="button" [disabled]="!hasNextPage()" (click)="changePage(query().page + 1)">
+            Next
+          </button>
+        </nav>
+      }
     }
   }
 </section>

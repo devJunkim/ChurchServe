@@ -6,9 +6,9 @@ public sealed class ServiceEvent
 
   public required string Title { get; init; }
 
-  public DateTimeOffset StartsAt { get; init; }
+  public DateTime StartsAt { get; init; }
 
-  public DateTimeOffset EndsAt { get; init; }
+  public DateTime EndsAt { get; init; }
 
   public required string Location { get; init; }
 
@@ -17,4 +17,6 @@ public sealed class ServiceEvent
   public int AssignedPositions { get; init; }
 
   public int Version { get; init; }
+
+  public ICollection<ServiceEventMinistry> Ministries { get; } = [];
 }

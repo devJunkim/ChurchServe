@@ -4,11 +4,10 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 10: RxJS Search, Cancellation, and Request
-State**. The Volunteers page now treats search text as a stream, waits for meaningful
-input, cancels stale work with `switchMap`, and renders explicit idle, loading, loaded,
-empty, and recoverable error states. A typed Angular repository calls a matching
-ASP.NET Core volunteer-search endpoint backed by SQLite.
+This repository currently represents **Part 11: Calendar Filters, Query Parameters,
+and Pagination**. The Schedule page now keeps its month, ministry, and page in the URL,
+so a filtered view survives refreshes and can be shared. Its Angular repository sends a
+typed query to an ASP.NET Core endpoint that filters, sorts, and pages in SQLite.
 
 ## Pinned toolchain
 
@@ -47,7 +46,7 @@ Open `http://localhost:4201/`. Angular proxies `/api` requests to the API at
 The ASP.NET Core server implements these endpoints:
 
 ```text
-GET  /api/service-events
+GET  /api/service-events?month={YYYY-MM}&ministry={name}&page={number}&pageSize={number}
 GET  /api/service-events/{eventId}
 POST /api/service-events
 GET  /api/volunteers?query={name}
@@ -57,7 +56,7 @@ SQLite keeps schedule and volunteer data runnable without installing a database 
 The EF Core boundary remains provider-focused so a later part can replace SQLite with
 Microsoft SQL Server while preserving the HTTP contract and Angular repositories.
 
-## Verify Part 10
+## Verify Part 11
 
 ```bash
 dotnet test ChurchServe.slnx
@@ -66,10 +65,11 @@ npm run build
 ```
 
 The API integration tests use isolated in-memory SQLite databases to verify schedule
-persistence and the volunteer search contract. Angular tests protect the application
-shell, HTTP repositories, runtime DTO validation, request states, retry behavior,
-debouncing, and cancellation. The production build verifies strict TypeScript and
-Angular template compilation across every lazy feature route.
+filtering, deterministic paging, persistence, and the volunteer search contract.
+Angular tests protect URL query parsing, router-driven filters, HTTP repositories,
+runtime DTO validation, request states, retry behavior, debouncing, and cancellation.
+The production build verifies strict TypeScript and Angular template compilation across
+every lazy feature route.
 
 ## Current structure
 
@@ -90,6 +90,8 @@ src/app/
       assignment-store.ts
       api/
       create-service-event-command.ts
+      page.ts
+      schedule-query.ts
       service-event-repository.ts
       service-event-create/
       service-event-detail/

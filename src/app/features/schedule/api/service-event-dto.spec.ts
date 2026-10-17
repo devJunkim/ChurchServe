@@ -1,4 +1,4 @@
-import { parseServiceEvent, parseServiceEventList } from './service-event-dto';
+import { parseServiceEvent, parseServiceEventPage } from './service-event-dto';
 
 describe('service-event DTO validation', () => {
   const validDto = {
@@ -24,13 +24,31 @@ describe('service-event DTO validation', () => {
     });
   });
 
-  it('rejects malformed records in a list response', () => {
-    expect(() => parseServiceEventList([{ ...validDto, requiredPositions: -1 }])).toThrowError(
-      'expected contract',
-    );
+  it('rejects malformed records in a page response', () => {
+    expect(() =>
+      parseServiceEventPage({
+        items: [{ ...validDto, requiredPositions: -1 }],
+        page: 1,
+        pageSize: 4,
+        totalItems: 1,
+      }),
+    ).toThrowError('expected contract');
   });
 
-  it('rejects a list response that is not an array', () => {
-    expect(() => parseServiceEventList({ items: [validDto] })).toThrowError('was not an array');
+  it('parses paging metadata with the event collection', () => {
+    expect(
+      parseServiceEventPage({ items: [validDto], page: 2, pageSize: 4, totalItems: 6 }),
+    ).toEqual({
+      items: [expect.objectContaining({ id: 'event-1' })],
+      page: 2,
+      pageSize: 4,
+      totalItems: 6,
+    });
+  });
+
+  it('rejects malformed paging metadata', () => {
+    expect(() =>
+      parseServiceEventPage({ items: [validDto], page: 0, pageSize: 4, totalItems: 1 }),
+    ).toThrowError('page response');
   });
 });

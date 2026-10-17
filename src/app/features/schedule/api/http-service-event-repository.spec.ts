@@ -18,6 +18,7 @@ describe('HttpServiceEventRepository', () => {
     assignedPositions: 7,
     version: 1,
   };
+  const query = { month: '2026-11', ministry: 'technical', page: 2, pageSize: 4 };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -30,15 +31,20 @@ describe('HttpServiceEventRepository', () => {
   afterEach(() => http.verify());
 
   it('lists and maps service events returned by the API', async () => {
-    const result = firstValueFrom(repository.list());
+    const result = firstValueFrom(repository.list(query));
 
-    const request = http.expectOne('/api/service-events');
+    const request = http.expectOne(
+      '/api/service-events?month=2026-11&page=2&pageSize=4&ministry=technical',
+    );
     expect(request.request.method).toBe('GET');
-    request.flush([dto]);
+    request.flush({ items: [dto], page: 2, pageSize: 4, totalItems: 5 });
 
-    await expect(result).resolves.toEqual([
-      expect.objectContaining({ id: 'event-1', title: 'Sunday Service' }),
-    ]);
+    await expect(result).resolves.toEqual({
+      items: [expect.objectContaining({ id: 'event-1', title: 'Sunday Service' })],
+      page: 2,
+      pageSize: 4,
+      totalItems: 5,
+    });
   });
 
   it('encodes an event ID and maps a detail response', async () => {
@@ -99,9 +105,14 @@ describe('HttpServiceEventRepository', () => {
   });
 
   it('rejects malformed API data', async () => {
-    const result = firstValueFrom(repository.list());
+    const result = firstValueFrom(repository.list(query));
 
-    http.expectOne('/api/service-events').flush([{ ...dto, startsAt: 'not-a-date' }]);
+    http.expectOne('/api/service-events?month=2026-11&page=2&pageSize=4&ministry=technical').flush({
+      items: [{ ...dto, startsAt: 'not-a-date' }],
+      page: 2,
+      pageSize: 4,
+      totalItems: 5,
+    });
 
     await expect(result).rejects.toThrowError('expected contract');
   });

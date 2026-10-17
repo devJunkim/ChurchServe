@@ -1,4 +1,5 @@
 import { ServiceEvent } from '../service-event';
+import { Page } from '../page';
 
 export interface ServiceEventDto {
   readonly id: string;
@@ -27,12 +28,23 @@ export function parseServiceEvent(value: unknown): ServiceEvent {
   };
 }
 
-export function parseServiceEventList(value: unknown): readonly ServiceEvent[] {
-  if (!Array.isArray(value)) {
-    throw new Error('The service-event list response was not an array.');
+export function parseServiceEventPage(value: unknown): Page<ServiceEvent> {
+  if (
+    !isRecord(value) ||
+    !Array.isArray(value['items']) ||
+    !isPositiveInteger(value['page']) ||
+    !isPositiveInteger(value['pageSize']) ||
+    !isNonNegativeInteger(value['totalItems'])
+  ) {
+    throw new Error('The service-event page response did not match the expected contract.');
   }
 
-  return value.map(parseServiceEvent);
+  return {
+    items: value['items'].map(parseServiceEvent),
+    page: value['page'],
+    pageSize: value['pageSize'],
+    totalItems: value['totalItems'],
+  };
 }
 
 function isServiceEventDto(value: unknown): value is ServiceEventDto {
@@ -66,6 +78,10 @@ function hasIsoDateString(value: Record<string, unknown>, key: string): boolean 
   );
 }
 
-function isNonNegativeInteger(value: unknown): boolean {
+function isNonNegativeInteger(value: unknown): value is number {
   return typeof value === 'number' && Number.isInteger(value) && value >= 0;
+}
+
+function isPositiveInteger(value: unknown): value is number {
+  return isNonNegativeInteger(value) && value > 0;
 }
