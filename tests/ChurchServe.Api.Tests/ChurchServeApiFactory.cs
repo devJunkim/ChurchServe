@@ -15,6 +15,11 @@ public sealed class ChurchServeApiFactory : WebApplicationFactory<Program>
   protected override void ConfigureWebHost(IWebHostBuilder builder)
   {
     builder.UseEnvironment("Testing");
+    builder.UseSetting("Authentication:LocalAccount:Id", "coordinator-1");
+    builder.UseSetting("Authentication:LocalAccount:Email", "coordinator@churchserve.local");
+    builder.UseSetting("Authentication:LocalAccount:DisplayName", "Test Coordinator");
+    builder.UseSetting("Authentication:LocalAccount:Password", "ChurchServeTest!13");
+    builder.UseSetting("Authentication:LocalAccount:Role", "scheduler");
     builder.ConfigureServices(services =>
     {
       services.RemoveAll<DbContextOptions<ChurchServeDbContext>>();

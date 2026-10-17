@@ -6,19 +6,37 @@
     <span>{{ applicationName }}</span>
   </a>
 
-  <nav aria-label="Primary navigation">
-    <a routerLink="/schedule" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-      Schedule
-    </a>
-    <a
-      routerLink="/volunteers"
-      routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: true }"
-    >
-      Volunteers
-    </a>
-  </nav>
+  <div class="header-actions">
+    @if (authenticatedUser(); as user) {
+      <nav aria-label="Primary navigation">
+        <a
+          routerLink="/schedule"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          Schedule
+        </a>
+        <a
+          routerLink="/volunteers"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          Volunteers
+        </a>
+      </nav>
+      <span class="current-user">{{ user.displayName }}</span>
+      <button type="button" class="sign-out" (click)="signOut()">Sign out</button>
+    } @else if (session().status === 'checking') {
+      <span class="session-status" role="status">Checking session…</span>
+    } @else {
+      <a class="sign-in" routerLink="/sign-in">Sign in</a>
+    }
+  </div>
 </header>
+
+@if (signOutError()) {
+  <p class="session-error" role="alert">{{ signOutError() }}</p>
+}
 
 <main id="main-content" tabindex="-1">
   <router-outlet />

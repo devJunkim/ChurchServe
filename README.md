@@ -4,10 +4,10 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 12: Reusable UI and Content Projection**.
-The Schedule and Volunteers pages now share accessible panel and empty-state components.
-Named content slots let each feature keep its own language and actions while the shared
-components own stable structure, styling, labels, and a small set of deliberate tones.
+This repository currently represents **Part 13: Authentication and Session State**.
+ChurchServe now restores a server-managed cookie session before rendering navigation,
+provides a tested sign-in and sign-out experience, protects coordination APIs, and uses
+Angular's XSRF convention with server-side antiforgery validation for mutating requests.
 
 ## Pinned toolchain
 
@@ -41,6 +41,16 @@ Open `http://localhost:4201/`. Angular proxies `/api` requests to the API at
 `http://localhost:5091`, so the browser still uses same-origin URLs. The API creates
 `server/ChurchServe.Api/churchserve.db` on first run and seeds two schedule entries.
 
+The development-only tutorial account is `coordinator@churchserve.local`. Configure its
+local password without committing it:
+
+```bash
+dotnet user-secrets set --project server/ChurchServe.Api "Authentication:LocalAccount:Password" "<choose-a-local-password>"
+```
+
+The local account authenticator is disabled outside Development and Testing; replace it
+with ASP.NET Core Identity or an external identity provider for a deployed application.
+
 ## API contract
 
 The ASP.NET Core server implements these endpoints:
@@ -50,13 +60,16 @@ GET  /api/service-events?month={YYYY-MM}&ministry={name}&page={number}&pageSize=
 GET  /api/service-events/{eventId}
 POST /api/service-events
 GET  /api/volunteers?query={name}
+GET  /api/session
+POST /api/session/sign-in
+DELETE /api/session
 ```
 
 SQLite keeps schedule and volunteer data runnable without installing a database server.
 The EF Core boundary remains provider-focused so a later part can replace SQLite with
 Microsoft SQL Server while preserving the HTTP contract and Angular repositories.
 
-## Verify Part 12
+## Verify Part 13
 
 ```bash
 dotnet test ChurchServe.slnx
@@ -66,16 +79,18 @@ npm run build
 
 The API integration tests use isolated in-memory SQLite databases to verify schedule
 filtering, deterministic paging, persistence, and the volunteer search contract.
-Angular tests protect content projection, unique accessible labels, caller-owned actions,
-URL query parsing, router-driven filters, HTTP repositories, request states, retry
-behavior, debouncing, and cancellation. The production build verifies strict TypeScript
-and Angular template compilation across every lazy feature route.
+Angular tests protect session restoration, sign-in transitions, password handling,
+sign-out timing, content projection, URL query parsing, HTTP repositories, request
+states, debouncing, and cancellation. API integration tests exercise real antiforgery
+tokens, encrypted authentication cookies, protected endpoints, invalid credentials, and
+logout. The production build verifies strict TypeScript and Angular template compilation.
 
 ## Current structure
 
 ```text
 server/
   ChurchServe.Api/
+    Authentication/
     Data/
     ServiceEvents/
     Volunteers/
@@ -83,8 +98,11 @@ server/
 tests/
   ChurchServe.Api.Tests/
 src/app/
+  core/
+    auth/
   features/
     home/
+    sign-in/
     schedule/
       assignment.ts
       assignment-store.ts

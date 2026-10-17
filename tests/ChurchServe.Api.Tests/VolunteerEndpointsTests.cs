@@ -10,7 +10,7 @@ public sealed class VolunteerEndpointsTests
   public async Task Search_returns_case_insensitive_name_matches()
   {
     using var factory = new ChurchServeApiFactory();
-    using var client = factory.CreateClient();
+    using var client = await factory.CreateAuthenticatedClientAsync();
 
     var response = await client.GetAsync("/api/volunteers?query=ANN");
     var volunteers = await response.Content.ReadFromJsonAsync<VolunteerResponse[]>();
@@ -27,7 +27,7 @@ public sealed class VolunteerEndpointsTests
   public async Task Search_returns_an_empty_list_for_short_queries(string query)
   {
     using var factory = new ChurchServeApiFactory();
-    using var client = factory.CreateClient();
+    using var client = await factory.CreateAuthenticatedClientAsync();
 
     var volunteers = await client.GetFromJsonAsync<VolunteerResponse[]>(
         $"/api/volunteers?query={query}");
@@ -40,7 +40,7 @@ public sealed class VolunteerEndpointsTests
   public async Task Search_treats_like_wildcards_as_literal_text()
   {
     using var factory = new ChurchServeApiFactory();
-    using var client = factory.CreateClient();
+    using var client = await factory.CreateAuthenticatedClientAsync();
 
     var volunteers = await client.GetFromJsonAsync<VolunteerResponse[]>(
         "/api/volunteers?query=%25%25");
