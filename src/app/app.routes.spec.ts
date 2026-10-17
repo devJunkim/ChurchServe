@@ -1,17 +1,31 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { of } from 'rxjs';
 import { NotFound } from './features/not-found/not-found';
-import { provideLocalPersistence } from './features/schedule/persistence/provide-local-persistence';
 import { ServiceEventCreate } from './features/schedule/service-event-create/service-event-create';
 import { ServiceEventDetail } from './features/schedule/service-event-detail/service-event-detail';
+import { ServiceEventRepository } from './features/schedule/service-event-repository';
 import { routes } from './app.routes';
 
 describe('application routes', () => {
   beforeEach(() => {
-    localStorage.clear();
+    const event = {
+      id: 'sunday-2026-11-01',
+      title: 'Sunday Morning Service',
+      startsAt: '2026-11-01T10:00:00-05:00',
+      endsAt: '2026-11-01T11:30:00-05:00',
+      location: 'Main Sanctuary',
+      requiredPositions: 10,
+      assignedPositions: 7,
+    };
+    const repository = {
+      list: () => of([event]),
+      findById: (id: string) => of(id === event.id ? event : undefined),
+      create: () => of(event),
+    };
     TestBed.configureTestingModule({
-      providers: [provideRouter(routes), provideLocalPersistence()],
+      providers: [provideRouter(routes), { provide: ServiceEventRepository, useValue: repository }],
     });
   });
 

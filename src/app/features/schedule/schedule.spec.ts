@@ -1,14 +1,40 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { provideLocalPersistence } from './persistence/provide-local-persistence';
+import { of, throwError } from 'rxjs';
+import { vi } from 'vitest';
 import { Schedule } from './schedule';
+import { ServiceEventRepository } from './service-event-repository';
 import { ServiceEvent } from './service-event';
 
 describe('Schedule', () => {
+  const first: ServiceEvent = {
+    id: 'event-1',
+    title: 'First Service',
+    startsAt: '2026-11-01T10:00:00-05:00',
+    endsAt: '2026-11-01T11:00:00-05:00',
+    location: 'Main Sanctuary',
+    requiredPositions: 4,
+    assignedPositions: 2,
+  };
+  const second: ServiceEvent = {
+    ...first,
+    id: 'event-2',
+    title: 'Second Service',
+  };
+  let repository: {
+    list: ReturnType<typeof vi.fn>;
+    findById: ReturnType<typeof vi.fn>;
+    create: ReturnType<typeof vi.fn>;
+  };
+
   beforeEach(() => {
-    localStorage.clear();
+    repository = {
+      list: vi.fn(() => of([first, second])),
+      findById: vi.fn((id: string) => of([first, second].find((event) => event.id === id))),
+      create: vi.fn(),
+    };
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), provideLocalPersistence()],
+      providers: [provideRouter([]), { provide: ServiceEventRepository, useValue: repository }],
     });
   });
 
@@ -19,7 +45,7 @@ describe('Schedule', () => {
     const element: HTMLElement = fixture.nativeElement;
     expect(element.querySelectorAll('app-service-event-card')).toHaveLength(2);
     expect(element.querySelector('app-service-event-card a')?.getAttribute('href')).toBe(
-      '/schedule/sunday-2026-11-01',
+      '/schedule/event-1',
     );
     expect(element.querySelector('.schedule-actions a')?.getAttribute('href')).toBe(
       '/schedule/new',
@@ -40,15 +66,12 @@ describe('Schedule', () => {
   });
 
   it('shows an error and reloads the seeded schedule', () => {
+    repository.list.mockReturnValueOnce(throwError(() => new Error('Network unavailable')));
     const fixture = TestBed.createComponent(Schedule);
-    fixture.componentInstance.setStateForTest({
-      status: 'error',
-      message: 'Please try again.',
-    });
     fixture.detectChanges();
 
     const element: HTMLElement = fixture.nativeElement;
-    expect(element.querySelector('[role="alert"]')?.textContent).toContain('Please try again.');
+    expect(element.querySelector('[role="alert"]')?.textContent).toContain('could not be loaded');
     expect(element.textContent).not.toContain('No upcoming services');
 
     element.querySelector<HTMLButtonElement>('[role="alert"] button')?.click();
@@ -71,21 +94,6 @@ describe('Schedule', () => {
 
   it('keeps each card associated with its event when events are reordered', () => {
     const fixture = TestBed.createComponent(Schedule);
-    const first: ServiceEvent = {
-      id: 'event-1',
-      title: 'First Service',
-      startsAt: '2026-11-01T10:00:00-05:00',
-      endsAt: '2026-11-01T11:00:00-05:00',
-      location: 'Main Sanctuary',
-      requiredPositions: 4,
-      assignedPositions: 2,
-    };
-    const second: ServiceEvent = {
-      ...first,
-      id: 'event-2',
-      title: 'Second Service',
-    };
-
     fixture.componentInstance.setStateForTest({ status: 'ready', events: [first, second] });
     fixture.detectChanges();
     const element: HTMLElement = fixture.nativeElement;

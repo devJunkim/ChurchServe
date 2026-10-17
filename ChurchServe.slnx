@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/server/">
+    <Project Path="server/ChurchServe.Api/ChurchServe.Api.csproj" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
@@ -59,13 +62,12 @@
     <File Path="src\app\features\schedule\service-event-repository.ts" />
     <File Path="src\app\features\schedule\service-event.ts" />
   </Folder>
-  <Folder Name="/src/app/features/schedule/persistence/">
-    <File Path="src\app\features\schedule\persistence\key-value-storage.ts" />
-    <File Path="src\app\features\schedule\persistence\local-data.spec.ts" />
-    <File Path="src\app\features\schedule\persistence\local-data.ts" />
-    <File Path="src\app\features\schedule\persistence\local-storage-service-event-repository.spec.ts" />
-    <File Path="src\app\features\schedule\persistence\local-storage-service-event-repository.ts" />
-    <File Path="src\app\features\schedule\persistence\provide-local-persistence.ts" />
+  <Folder Name="/src/app/features/schedule/api/">
+    <File Path="src\app\features\schedule\api\http-service-event-repository.spec.ts" />
+    <File Path="src\app\features\schedule\api\http-service-event-repository.ts" />
+    <File Path="src\app\features\schedule\api\provide-service-event-api.ts" />
+    <File Path="src\app\features\schedule\api\service-event-dto.spec.ts" />
+    <File Path="src\app\features\schedule\api\service-event-dto.ts" />
   </Folder>
   <Folder Name="/src/app/features/schedule/service-event-create/">
     <File Path="src\app\features\schedule\service-event-create\service-event-create.html" />
@@ -93,5 +95,8 @@
   <Folder Name="/src/app/features/volunteers/">
     <File Path="src\app\features\volunteers\volunteers.html" />
     <File Path="src\app\features\volunteers\volunteers.ts" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ChurchServe.Api.Tests/ChurchServe.Api.Tests.csproj" />
   </Folder>
 </Solution>

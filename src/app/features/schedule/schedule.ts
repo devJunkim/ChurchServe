@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { ServiceEventCard } from './service-event-card/service-event-card';
 import { ServiceEventRepository } from './service-event-repository';
@@ -18,6 +26,7 @@ export type ScheduleState =
 })
 export class Schedule {
   private readonly repository = inject(ServiceEventRepository);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly state = signal<ScheduleState>({ status: 'loading' });
 
@@ -36,7 +45,18 @@ export class Schedule {
   }
 
   protected reload(): void {
-    this.replaceState({ status: 'ready', events: this.repository.list() });
+    this.replaceState({ status: 'loading' });
+    this.repository
+      .list()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (events) => this.replaceState({ status: 'ready', events }),
+        error: () =>
+          this.replaceState({
+            status: 'error',
+            message: 'The schedule could not be loaded. Check your connection and try again.',
+          }),
+      });
   }
 
   setStateForTest(state: ScheduleState): void {

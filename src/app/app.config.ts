@@ -1,12 +1,12 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { provideLocalPersistence } from './features/schedule/persistence/provide-local-persistence';
+import { provideServiceEventApi } from './features/schedule/api/provide-service-event-api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideLocalPersistence(),
+    provideServiceEventApi(),
   ],
 };
