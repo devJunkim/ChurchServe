@@ -10,28 +10,32 @@
     <a routerLink="/schedule/new">Create service</a>
   </div>
 
-  <section class="schedule-filters" aria-labelledby="filter-heading">
-    <h2 id="filter-heading">Filter schedule</h2>
+  <app-panel class="schedule-filters" tone="subtle">
+    <span panel-title>Filter schedule</span>
+    <div class="schedule-filter-fields">
+      <label>
+        Month
+        <input
+          type="month"
+          [value]="query().month"
+          (change)="changeMonth($any($event.target).value)"
+        />
+      </label>
 
-    <label>
-      Month
-      <input
-        type="month"
-        [value]="query().month"
-        (change)="changeMonth($any($event.target).value)"
-      />
-    </label>
-
-    <label>
-      Ministry
-      <select [value]="query().ministry ?? ''" (change)="changeMinistry($any($event.target).value)">
-        <option value="">All ministries</option>
-        @for (ministry of ministries; track ministry.value) {
-          <option [value]="ministry.value">{{ ministry.label }}</option>
-        }
-      </select>
-    </label>
-  </section>
+      <label>
+        Ministry
+        <select
+          [value]="query().ministry ?? ''"
+          (change)="changeMinistry($any($event.target).value)"
+        >
+          <option value="">All ministries</option>
+          @for (ministry of ministries; track ministry.value) {
+            <option [value]="ministry.value">{{ ministry.label }}</option>
+          }
+        </select>
+      </label>
+    </div>
+  </app-panel>
 
   @switch (state().status) {
     @case ('loading') {
@@ -51,10 +55,15 @@
         @for (event of events(); track event.id) {
           <app-service-event-card [event]="event" />
         } @empty {
-          <section class="state-panel empty-state">
-            <h2>No matching services</h2>
+          <app-empty-state>
+            <span empty-title>No matching services</span>
             <p>Try a different month or ministry.</p>
-          </section>
+            @if (query().ministry) {
+              <button empty-actions type="button" (click)="showAllMinistries()">
+                Show all ministries
+              </button>
+            }
+          </app-empty-state>
         }
       </div>
 

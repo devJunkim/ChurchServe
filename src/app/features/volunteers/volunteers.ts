@@ -1,6 +1,8 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { EmptyState } from '../../shared/ui/empty-state/empty-state';
+import { Panel } from '../../shared/ui/panel/panel';
 import {
   catchError,
   distinctUntilChanged,
@@ -25,7 +27,7 @@ export type VolunteerSearchState =
 
 @Component({
   selector: 'app-volunteers',
-  imports: [AsyncPipe, ReactiveFormsModule],
+  imports: [AsyncPipe, ReactiveFormsModule, EmptyState, Panel],
   templateUrl: './volunteers.html',
   styleUrl: './volunteers.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

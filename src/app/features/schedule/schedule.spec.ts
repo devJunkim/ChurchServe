@@ -132,4 +132,26 @@ describe('Schedule', () => {
     expect(router.url).toContain('ministry=technical');
     expect(router.url).toContain('page=1');
   });
+
+  it('lets an empty filtered view return to all ministries', async () => {
+    const router = TestBed.inject(Router);
+    await router.navigate([], {
+      queryParams: { month: '2026-11', ministry: 'technical', page: 1 },
+    });
+    const fixture = TestBed.createComponent(Schedule);
+    fixture.componentInstance.setStateForTest({ status: 'ready', page: page([]) });
+    fixture.detectChanges();
+
+    const buttons = fixture.nativeElement.querySelectorAll(
+      'button',
+    ) as NodeListOf<HTMLButtonElement>;
+    const button = Array.from(buttons).find(
+      (candidate) => candidate.textContent?.trim() === 'Show all ministries',
+    );
+    button?.click();
+    await fixture.whenStable();
+
+    expect(router.url).not.toContain('ministry=');
+    expect(router.url).toContain('page=1');
+  });
 });

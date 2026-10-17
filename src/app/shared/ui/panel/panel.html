@@ -1,0 +1,11 @@
+<section
+  class="panel"
+  [class.panel--subtle]="tone() === 'subtle'"
+  [attr.aria-labelledby]="headingId"
+>
+  <header class="panel__header">
+    <h2 [id]="headingId"><ng-content select="[panel-title]" /></h2>
+    <div class="panel__actions"><ng-content select="[panel-actions]" /></div>
+  </header>
+  <div class="panel__body"><ng-content /></div>
+</section>

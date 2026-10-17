@@ -38,21 +38,6 @@ h1 {
   line-height: 1.7;
 }
 
-.search-panel,
-.results {
-  padding: clamp(1.25rem, 4vw, 2rem);
-  border: 1px solid #d7e2e0;
-  border-radius: 1rem;
-  background: #fff;
-  box-shadow: 0 1rem 2.5rem rgb(16 42 67 / 7%);
-}
-
-.search-panel h2,
-.results h2 {
-  margin-bottom: 1.25rem;
-  font-size: 1.35rem;
-}
-
 label {
   display: block;
   margin-bottom: 0.45rem;

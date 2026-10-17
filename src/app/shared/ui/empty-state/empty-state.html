@@ -1,0 +1,9 @@
+<section
+  class="empty-state"
+  [class.empty-state--warning]="tone() === 'warning'"
+  [attr.aria-labelledby]="headingId"
+>
+  <h2 [id]="headingId"><ng-content select="[empty-title]" /></h2>
+  <div class="empty-state__body"><ng-content /></div>
+  <div class="empty-state__actions"><ng-content select="[empty-actions]" /></div>
+</section>
