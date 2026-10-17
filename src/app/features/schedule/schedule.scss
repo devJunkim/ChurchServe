@@ -63,6 +63,53 @@ h1 {
   outline-offset: 3px;
 }
 
+.schedule-filters {
+  display: grid;
+  margin-top: 2rem;
+  padding: 1.25rem;
+  border: 1px solid #d9e2ec;
+  border-radius: 0.85rem;
+  background: #f8fafc;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+}
+
+.schedule-filters h2 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.schedule-filters label {
+  display: grid;
+  color: #334e68;
+  font-weight: 700;
+  gap: 0.45rem;
+}
+
+.schedule-filters input,
+.schedule-filters select {
+  min-height: 2.8rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid #9fb3c8;
+  border-radius: 0.55rem;
+  background: #fff;
+  color: #102a43;
+  font: inherit;
+}
+
+.schedule-filters input:focus-visible,
+.schedule-filters select:focus-visible {
+  outline: 3px solid #74c0fc;
+  outline-offset: 2px;
+}
+
 .state-panel {
   margin: 2.5rem 0 0;
   padding: 1.25rem;
@@ -119,4 +166,55 @@ h1 {
 
 .empty-state p {
   margin-top: 0.35rem;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+  gap: 1rem;
+}
+
+.pagination p {
+  margin: 0;
+  color: #52667a;
+  text-align: center;
+}
+
+.pagination button {
+  padding: 0.65rem 0.9rem;
+  border: 1px solid #087f5b;
+  border-radius: 0.55rem;
+  background: #fff;
+  color: #087f5b;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 750;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #e6fcf5;
+}
+
+.pagination button:focus-visible {
+  outline: 3px solid #74c0fc;
+  outline-offset: 2px;
+}
+
+.pagination button:disabled {
+  border-color: #bcccdc;
+  color: #829ab1;
+  cursor: not-allowed;
+}
+
+@media (max-width: 34rem) {
+  .pagination {
+    flex-wrap: wrap;
+  }
+
+  .pagination p {
+    width: 100%;
+    order: -1;
+  }
 }

@@ -13,12 +13,57 @@ public sealed class ServiceEventEndpointsTests
     using var client = factory.CreateClient();
 
     var response = await client.GetAsync("/api/service-events");
-    var serviceEvents = await response.Content.ReadFromJsonAsync<ServiceEventResponse[]>();
+    var page = await response.Content.ReadFromJsonAsync<ServiceEventPageResponse>();
 
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    Assert.NotNull(serviceEvents);
-    Assert.Equal(2, serviceEvents.Length);
-    Assert.Equal("sunday-2026-11-01", serviceEvents[0].Id);
+    Assert.NotNull(page);
+    Assert.Equal(2, page.TotalItems);
+    Assert.Equal(2, page.Items.Count);
+    Assert.Equal("sunday-2026-11-01", page.Items[0].Id);
+  }
+
+  [Fact]
+  public async Task List_filters_by_month_and_ministry()
+  {
+    using var factory = new ChurchServeApiFactory();
+    using var client = factory.CreateClient();
+
+    var page = await client.GetFromJsonAsync<ServiceEventPageResponse>(
+        "/api/service-events?month=2026-11&ministry=technical&page=1&pageSize=4");
+
+    Assert.NotNull(page);
+    Assert.Equal(1, page.TotalItems);
+    Assert.Equal("rehearsal-2026-11-05", Assert.Single(page.Items).Id);
+  }
+
+  [Fact]
+  public async Task List_returns_stable_paging_metadata()
+  {
+    using var factory = new ChurchServeApiFactory();
+    using var client = factory.CreateClient();
+
+    var page = await client.GetFromJsonAsync<ServiceEventPageResponse>(
+        "/api/service-events?month=2026-11&page=2&pageSize=1");
+
+    Assert.NotNull(page);
+    Assert.Equal(2, page.Page);
+    Assert.Equal(1, page.PageSize);
+    Assert.Equal(2, page.TotalItems);
+    Assert.Equal("rehearsal-2026-11-05", Assert.Single(page.Items).Id);
+  }
+
+  [Theory]
+  [InlineData("/api/service-events?month=bad")]
+  [InlineData("/api/service-events?page=0")]
+  [InlineData("/api/service-events?pageSize=51")]
+  public async Task List_rejects_invalid_query_values(string url)
+  {
+    using var factory = new ChurchServeApiFactory();
+    using var client = factory.CreateClient();
+
+    var response = await client.GetAsync(url);
+
+    Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
   }
 
   [Fact]

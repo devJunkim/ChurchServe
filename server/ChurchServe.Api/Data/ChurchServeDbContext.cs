@@ -8,6 +8,7 @@ public sealed class ChurchServeDbContext(DbContextOptions<ChurchServeDbContext> 
     : DbContext(options)
 {
   public DbSet<ServiceEvent> ServiceEvents => Set<ServiceEvent>();
+  public DbSet<ServiceEventMinistry> ServiceEventMinistries => Set<ServiceEventMinistry>();
   public DbSet<Volunteer> Volunteers => Set<Volunteer>();
   public DbSet<VolunteerMinistry> VolunteerMinistries => Set<VolunteerMinistry>();
 
@@ -19,6 +20,16 @@ public sealed class ChurchServeDbContext(DbContextOptions<ChurchServeDbContext> 
     serviceEvent.Property(item => item.Id).HasMaxLength(64);
     serviceEvent.Property(item => item.Title).HasMaxLength(200);
     serviceEvent.Property(item => item.Location).HasMaxLength(200);
+
+    var serviceEventMinistry = modelBuilder.Entity<ServiceEventMinistry>();
+    serviceEventMinistry.ToTable("ServiceEventMinistries");
+    serviceEventMinistry.HasKey(item => new { item.ServiceEventId, item.Ministry });
+    serviceEventMinistry.Property(item => item.ServiceEventId).HasMaxLength(64);
+    serviceEventMinistry.Property(item => item.Ministry).HasMaxLength(100);
+    serviceEventMinistry.HasOne(item => item.ServiceEvent)
+        .WithMany(item => item.Ministries)
+        .HasForeignKey(item => item.ServiceEventId)
+        .OnDelete(DeleteBehavior.Cascade);
 
     var volunteer = modelBuilder.Entity<Volunteer>();
     volunteer.ToTable("Volunteers");

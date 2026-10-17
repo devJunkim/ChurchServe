@@ -13,6 +13,15 @@ public static class DatabaseInitializer
     // Part 9 used EnsureCreated before the volunteer tables existed. These idempotent
     // statements upgrade that local tutorial database without deleting its schedule data.
     await dbContext.Database.ExecuteSqlRawAsync("""
+        CREATE TABLE IF NOT EXISTS "ServiceEventMinistries" (
+          "ServiceEventId" TEXT NOT NULL,
+          "Ministry" TEXT NOT NULL,
+          CONSTRAINT "PK_ServiceEventMinistries" PRIMARY KEY ("ServiceEventId", "Ministry"),
+          CONSTRAINT "FK_ServiceEventMinistries_ServiceEvents_ServiceEventId"
+            FOREIGN KEY ("ServiceEventId") REFERENCES "ServiceEvents" ("Id") ON DELETE CASCADE
+        );
+        """);
+    await dbContext.Database.ExecuteSqlRawAsync("""
         CREATE TABLE IF NOT EXISTS "Volunteers" (
           "Id" TEXT NOT NULL CONSTRAINT "PK_Volunteers" PRIMARY KEY,
           "DisplayName" TEXT NOT NULL
@@ -35,8 +44,8 @@ public static class DatabaseInitializer
           {
             Id = "sunday-2026-11-01",
             Title = "Sunday Morning Service",
-            StartsAt = DateTimeOffset.Parse("2026-11-01T10:00:00-05:00"),
-            EndsAt = DateTimeOffset.Parse("2026-11-01T11:30:00-05:00"),
+            StartsAt = DateTimeOffset.Parse("2026-11-01T10:00:00-05:00").UtcDateTime,
+            EndsAt = DateTimeOffset.Parse("2026-11-01T11:30:00-05:00").UtcDateTime,
             Location = "Main Sanctuary",
             RequiredPositions = 10,
             AssignedPositions = 7,
@@ -46,8 +55,8 @@ public static class DatabaseInitializer
           {
             Id = "rehearsal-2026-11-05",
             Title = "Worship Team Rehearsal",
-            StartsAt = DateTimeOffset.Parse("2026-11-05T19:00:00-05:00"),
-            EndsAt = DateTimeOffset.Parse("2026-11-05T20:30:00-05:00"),
+            StartsAt = DateTimeOffset.Parse("2026-11-05T19:00:00-05:00").UtcDateTime,
+            EndsAt = DateTimeOffset.Parse("2026-11-05T20:30:00-05:00").UtcDateTime,
             Location = "Music Room",
             RequiredPositions = 6,
             AssignedPositions = 6,
@@ -64,6 +73,15 @@ public static class DatabaseInitializer
           CreateVolunteer("jordan-kim", "Jordan Kim", "hospitality", "welcome"),
           CreateVolunteer("maria-santos", "Maria Santos", "children", "worship"),
           CreateVolunteer("sam-wilson", "Sam Wilson", "hospitality", "technical"));
+    }
+
+    if (!await dbContext.ServiceEventMinistries.AnyAsync())
+    {
+      dbContext.ServiceEventMinistries.AddRange(
+          CreateServiceEventMinistry("sunday-2026-11-01", "welcome"),
+          CreateServiceEventMinistry("sunday-2026-11-01", "worship"),
+          CreateServiceEventMinistry("rehearsal-2026-11-05", "technical"),
+          CreateServiceEventMinistry("rehearsal-2026-11-05", "worship"));
     }
 
     await dbContext.SaveChangesAsync();
@@ -86,4 +104,12 @@ public static class DatabaseInitializer
 
     return volunteer;
   }
+
+  private static ServiceEventMinistry CreateServiceEventMinistry(
+      string serviceEventId,
+      string ministry) => new()
+      {
+        ServiceEventId = serviceEventId,
+        Ministry = ministry,
+      };
 }
