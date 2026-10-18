@@ -4,11 +4,11 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 15: Shared State with Signals**.
-ChurchServe now keeps schedule request state, cached events, and derived open-position totals
-in a route-scoped signal store shared by the schedule list, creation form, and detail resolver.
-The store avoids duplicate loads, cancels stale requests, and is discarded when the user leaves
-the schedule feature.
+This repository currently represents **Part 16: Integrated Angular Testing**.
+ChurchServe now has reusable typed test data, a behavioral repository fake, and a routed workflow
+test that crosses the real router, route-scoped store, resolver, and rendered components. Pull
+requests and updates to `main` run the Angular tests, production build, and API integration tests
+in GitHub Actions.
 
 ## Pinned toolchain
 
@@ -70,17 +70,19 @@ SQLite keeps schedule and volunteer data runnable without installing a database 
 The EF Core boundary remains provider-focused so a later part can replace SQLite with
 Microsoft SQL Server while preserving the HTTP contract and Angular repositories.
 
-## Verify Part 15
+## Verify Part 16
 
 ```bash
 dotnet test ChurchServe.slnx
-npm test -- --watch=false
+npm run test:ci
+npm run test:coverage
 npm run build
 ```
 
 The API integration tests use isolated in-memory SQLite databases to verify schedule
 filtering, deterministic paging, persistence, and the volunteer search contract.
-Angular tests protect route-scoped signal state, request deduplication, caching, derived values,
+Angular tests protect routed feature integration, route-scoped signal state, request deduplication,
+caching, derived values,
 session restoration, sign-in transitions, password handling,
 sign-out timing, guarded redirects, safe return URLs, resolver outcomes, dirty-form
 navigation, content projection, URL query parsing, HTTP repositories, request states,
@@ -100,6 +102,9 @@ server/
     Program.cs
 tests/
   ChurchServe.Api.Tests/
+src/testing/
+  fake-service-event-repository.ts
+  service-event.builder.ts
 src/app/
   core/
     auth/
