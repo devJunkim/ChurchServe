@@ -1,4 +1,4 @@
-import { Volunteer } from '../volunteer';
+import { Volunteer } from '../../../shared/domain/volunteer';
 
 interface VolunteerDto {
   readonly id: string;

@@ -1,4 +1,4 @@
-import { Volunteer } from '../volunteers/volunteer';
+import { Volunteer } from '../../shared/domain/volunteer';
 import { Assignment, MinistryPosition } from './assignment';
 import { AssignmentStore, validateAssignment } from './assignment-store';
 

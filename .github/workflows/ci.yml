@@ -33,6 +33,9 @@ jobs:
       - name: Run Angular tests
         run: npm run test:ci
 
+      - name: Check architecture boundaries
+        run: npm run check:architecture
+
       - name: Build Angular application
         run: npm run build
 

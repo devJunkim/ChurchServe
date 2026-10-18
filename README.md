@@ -4,11 +4,10 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 16: Integrated Angular Testing**.
-ChurchServe now has reusable typed test data, a behavioral repository fake, and a routed workflow
-test that crosses the real router, route-scoped store, resolver, and rendered components. Pull
-requests and updates to `main` run the Angular tests, production build, and API integration tests
-in GitHub Actions.
+This repository currently represents **Part 17: Feature Architecture and Lazy Routes**.
+ChurchServe now lazy-loads schedule and volunteer route configurations, keeps feature repositories
+and state inside route-scoped injectors, and checks dependency direction with an executable
+architecture rule. Existing URLs and user behavior remain unchanged.
 
 ## Pinned toolchain
 
@@ -70,18 +69,19 @@ SQLite keeps schedule and volunteer data runnable without installing a database 
 The EF Core boundary remains provider-focused so a later part can replace SQLite with
 Microsoft SQL Server while preserving the HTTP contract and Angular repositories.
 
-## Verify Part 16
+## Verify Part 17
 
 ```bash
 dotnet test ChurchServe.slnx
 npm run test:ci
 npm run test:coverage
+npm run check:architecture
 npm run build
 ```
 
 The API integration tests use isolated in-memory SQLite databases to verify schedule
 filtering, deterministic paging, persistence, and the volunteer search contract.
-Angular tests protect routed feature integration, route-scoped signal state, request deduplication,
+Angular tests protect lazy route activation, route-scoped state recreation, request deduplication,
 caching, derived values,
 session restoration, sign-in transitions, password handling,
 sign-out timing, guarded redirects, safe return URLs, resolver outcomes, dirty-form
@@ -115,6 +115,7 @@ src/app/
     not-found/
     sign-in/
     schedule/
+      schedule.routes.ts
       assignment.ts
       assignment-store.ts
       api/
@@ -128,6 +129,7 @@ src/app/
         service-event.resolver.ts
       service-event-form/
     volunteers/
+      volunteers.routes.ts
       api/
       volunteer.ts
       volunteer-repository.ts
@@ -145,6 +147,8 @@ src/app/
   app.spec.ts
   app.ts
 proxy.conf.json
+tools/
+  check-architecture.mjs
 ```
 
 `features` owns user-facing workflows. Application-wide infrastructure and

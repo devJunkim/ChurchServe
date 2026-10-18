@@ -1,8 +1,4 @@
 import { Routes } from '@angular/router';
-import { signedInGuard } from './core/auth/signed-in.guard';
-import { unsavedChangesGuard } from './core/routing/unsaved-changes.guard';
-import { serviceEventResolver } from './features/schedule/service-event-detail/service-event.resolver';
-import { ScheduleStore } from './features/schedule/schedule-store';
 
 export const routes: Routes = [
   {
@@ -18,41 +14,13 @@ export const routes: Routes = [
   },
   {
     path: 'schedule',
-    canActivate: [signedInGuard],
-    providers: [ScheduleStore],
-    children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/schedule/schedule').then((module) => module.Schedule),
-        title: 'Schedule | ChurchServe',
-      },
-      {
-        path: 'new',
-        canDeactivate: [unsavedChangesGuard],
-        loadComponent: () =>
-          import('./features/schedule/service-event-create/service-event-create').then(
-            (module) => module.ServiceEventCreate,
-          ),
-        title: 'Create service | ChurchServe',
-      },
-      {
-        path: ':eventId',
-        resolve: { serviceEvent: serviceEventResolver },
-        loadComponent: () =>
-          import('./features/schedule/service-event-detail/service-event-detail').then(
-            (module) => module.ServiceEventDetail,
-          ),
-        title: 'Service details | ChurchServe',
-      },
-    ],
+    loadChildren: () =>
+      import('./features/schedule/schedule.routes').then((module) => module.SCHEDULE_ROUTES),
   },
   {
     path: 'volunteers',
-    canActivate: [signedInGuard],
-    loadComponent: () =>
-      import('./features/volunteers/volunteers').then((module) => module.Volunteers),
-    title: 'Volunteers | ChurchServe',
+    loadChildren: () =>
+      import('./features/volunteers/volunteers.routes').then((module) => module.VOLUNTEER_ROUTES),
   },
   {
     path: 'unavailable',
