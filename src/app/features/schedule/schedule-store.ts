@@ -1,5 +1,6 @@
-import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, computed, effect, inject, signal } from '@angular/core';
 import { Observable, Subscription, of, tap } from 'rxjs';
+import { SessionStore } from '../../core/auth/session-store';
 import { CreateServiceEventCommand } from './create-service-event-command';
 import { Page } from './page';
 import { equalScheduleQuery, ScheduleQuery } from './schedule-query';
@@ -11,6 +12,7 @@ export type ScheduleLoadState = 'idle' | 'loading' | 'loaded' | 'failed';
 @Injectable()
 export class ScheduleStore {
   private readonly repository = inject(ServiceEventRepository);
+  private readonly sessionStore = inject(SessionStore, { optional: true });
   private readonly destroyRef = inject(DestroyRef);
   private readonly loadStateValue = signal<ScheduleLoadState>('idle');
   private readonly queryValue = signal<ScheduleQuery | null>(null);
@@ -33,6 +35,11 @@ export class ScheduleStore {
 
   constructor() {
     this.destroyRef.onDestroy(() => this.loadSubscription?.unsubscribe());
+    effect(() => {
+      if (this.sessionStore?.session().status === 'anonymous') {
+        this.clear();
+      }
+    });
   }
 
   load(query: ScheduleQuery, force = false): void {
@@ -103,5 +110,15 @@ export class ScheduleStore {
       nextCache.set(event.id, event);
     }
     this.eventCacheValue.set(nextCache);
+  }
+
+  private clear(): void {
+    this.loadSubscription?.unsubscribe();
+    this.loadSubscription = undefined;
+    this.loadStateValue.set('idle');
+    this.queryValue.set(null);
+    this.pageValue.set(null);
+    this.loadErrorValue.set('');
+    this.eventCacheValue.set(new Map());
   }
 }

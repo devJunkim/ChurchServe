@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Observable, of, Subject, throwError } from 'rxjs';
-import { Volunteer } from './volunteer';
+import { Volunteer } from '../../shared/domain/volunteer';
 import { VolunteerRepository } from './volunteer-repository';
 import { Volunteers } from './volunteers';
 

@@ -1,7 +1,9 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Subject, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { CreateServiceEventCommand } from './create-service-event-command';
+import { SessionState, SessionStore } from '../../core/auth/session-store';
 import { Page } from './page';
 import { ScheduleQuery } from './schedule-query';
 import { ScheduleStore } from './schedule-store';
@@ -31,15 +33,37 @@ describe('ScheduleStore', () => {
     create: ReturnType<typeof vi.fn>;
   };
   let store: ScheduleStore;
+  const session = signal<SessionState>({
+    status: 'authenticated',
+    user: {
+      id: 'coordinator-1',
+      email: 'coordinator@churchserve.local',
+      displayName: 'Demo Coordinator',
+      roles: ['scheduler'],
+    },
+  });
 
   beforeEach(() => {
+    session.set({
+      status: 'authenticated',
+      user: {
+        id: 'coordinator-1',
+        email: 'coordinator@churchserve.local',
+        displayName: 'Demo Coordinator',
+        roles: ['scheduler'],
+      },
+    });
     repository = {
       list: vi.fn(() => of(page([event]))),
       findById: vi.fn(() => of(event)),
       create: vi.fn(() => of(event)),
     };
     TestBed.configureTestingModule({
-      providers: [ScheduleStore, { provide: ServiceEventRepository, useValue: repository }],
+      providers: [
+        ScheduleStore,
+        { provide: ServiceEventRepository, useValue: repository },
+        { provide: SessionStore, useValue: { session: session.asReadonly() } },
+      ],
     });
     store = TestBed.inject(ScheduleStore);
   });
@@ -110,5 +134,18 @@ describe('ScheduleStore', () => {
     store.findById(event.id).subscribe();
     expect(repository.create).toHaveBeenCalledWith(command);
     expect(repository.findById).not.toHaveBeenCalled();
+  });
+
+  it('clears identity-bound state when the session becomes anonymous', () => {
+    store.load(query);
+
+    session.set({ status: 'anonymous' });
+    TestBed.tick();
+
+    expect(store.loadState()).toBe('idle');
+    expect(store.query()).toBeNull();
+    expect(store.page()).toBeNull();
+    store.findById(event.id).subscribe();
+    expect(repository.findById).toHaveBeenCalledOnce();
   });
 });

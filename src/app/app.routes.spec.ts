@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
+import { provideRouter, Router, Routes } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { of } from 'rxjs';
 import { SessionState, SessionStore } from './core/auth/session-store';
@@ -10,6 +10,8 @@ import { ServiceEventCreate } from './features/schedule/service-event-create/ser
 import { ServiceEventDetail } from './features/schedule/service-event-detail/service-event-detail';
 import { ServiceEventRepository } from './features/schedule/service-event-repository';
 import { Schedule } from './features/schedule/schedule';
+import { SCHEDULE_ROUTES } from './features/schedule/schedule.routes';
+import { ScheduleStore } from './features/schedule/schedule-store';
 import { FakeServiceEventRepository } from '../testing/fake-service-event-repository';
 import { buildServiceEvent } from '../testing/service-event.builder';
 import { routes } from './app.routes';
@@ -40,8 +42,7 @@ describe('application routes', () => {
     repository = new FakeServiceEventRepository([event]);
     TestBed.configureTestingModule({
       providers: [
-        provideRouter(routes),
-        { provide: ServiceEventRepository, useValue: repository },
+        provideRouter(routesWithServiceEventRepository(repository)),
         {
           provide: SessionStore,
           useValue: {
@@ -70,6 +71,10 @@ describe('application routes', () => {
     expect(harness.routeNativeElement?.textContent).toContain('Sunday Morning Service');
     expect(harness.routeNativeElement?.textContent).toContain('3 open positions');
     expect(repository.findByIdCalls).toEqual([]);
+  });
+
+  it('keeps schedule state outside the root injector', () => {
+    expect(() => TestBed.inject(ScheduleStore)).toThrow();
   });
 
   it('opens a service detail route with its ID', async () => {
@@ -135,3 +140,18 @@ describe('application routes', () => {
     expect(harness.routeNativeElement?.textContent).toContain('Page not found');
   });
 });
+
+function routesWithServiceEventRepository(repository: ServiceEventRepository): Routes {
+  return routes.map((route) =>
+    route.path === 'schedule'
+      ? {
+          ...route,
+          loadChildren: async () =>
+            SCHEDULE_ROUTES.map((featureRoute) => ({
+              ...featureRoute,
+              providers: [ScheduleStore, { provide: ServiceEventRepository, useValue: repository }],
+            })),
+        }
+      : route,
+  );
+}

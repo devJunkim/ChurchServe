@@ -16,7 +16,7 @@ import {
   switchMap,
   timer,
 } from 'rxjs';
-import { Volunteer } from './volunteer';
+import { Volunteer } from '../../shared/domain/volunteer';
 import { VolunteerRepository } from './volunteer-repository';
 
 export type VolunteerSearchState =

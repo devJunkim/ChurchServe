@@ -1,5 +1,5 @@
 import { computed, signal } from '@angular/core';
-import { Volunteer } from '../volunteers/volunteer';
+import { Volunteer } from '../../shared/domain/volunteer';
 import { Assignment, MinistryPosition } from './assignment';
 
 export interface AssignmentState {

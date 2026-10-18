@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { Volunteer } from '../volunteer';
+import { Volunteer } from '../../../shared/domain/volunteer';
 import { VolunteerRepository } from '../volunteer-repository';
 import { parseVolunteerList } from './volunteer-dto';
 
