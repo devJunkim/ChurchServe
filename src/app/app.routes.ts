@@ -1,4 +1,7 @@
 import { Routes } from '@angular/router';
+import { signedInGuard } from './core/auth/signed-in.guard';
+import { unsavedChangesGuard } from './core/routing/unsaved-changes.guard';
+import { serviceEventResolver } from './features/schedule/service-event-detail/service-event.resolver';
 
 export const routes: Routes = [
   {
@@ -14,11 +17,14 @@ export const routes: Routes = [
   },
   {
     path: 'schedule',
+    canActivate: [signedInGuard],
     loadComponent: () => import('./features/schedule/schedule').then((module) => module.Schedule),
     title: 'Schedule | ChurchServe',
   },
   {
     path: 'schedule/new',
+    canActivate: [signedInGuard],
+    canDeactivate: [unsavedChangesGuard],
     loadComponent: () =>
       import('./features/schedule/service-event-create/service-event-create').then(
         (module) => module.ServiceEventCreate,
@@ -27,6 +33,8 @@ export const routes: Routes = [
   },
   {
     path: 'schedule/:eventId',
+    canActivate: [signedInGuard],
+    resolve: { serviceEvent: serviceEventResolver },
     loadComponent: () =>
       import('./features/schedule/service-event-detail/service-event-detail').then(
         (module) => module.ServiceEventDetail,
@@ -35,9 +43,18 @@ export const routes: Routes = [
   },
   {
     path: 'volunteers',
+    canActivate: [signedInGuard],
     loadComponent: () =>
       import('./features/volunteers/volunteers').then((module) => module.Volunteers),
     title: 'Volunteers | ChurchServe',
+  },
+  {
+    path: 'unavailable',
+    loadComponent: () =>
+      import('./features/navigation-unavailable/navigation-unavailable').then(
+        (module) => module.NavigationUnavailable,
+      ),
+    title: 'Page unavailable | ChurchServe',
   },
   {
     path: 'not-found',

@@ -34,6 +34,10 @@
   </div>
 </header>
 
+@if (isNavigating()) {
+  <p class="navigation-progress" role="status">Loading page…</p>
+}
+
 @if (signOutError()) {
   <p class="session-error" role="alert">{{ signOutError() }}</p>
 }

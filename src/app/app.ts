@@ -20,6 +20,7 @@ export class App {
     return session.status === 'authenticated' ? session.user : null;
   });
   protected readonly signOutError = signal('');
+  protected readonly isNavigating = computed(() => this.router.currentNavigation() !== null);
 
   protected signOut(): void {
     this.signOutError.set('');
