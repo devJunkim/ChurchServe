@@ -4,10 +4,10 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 13: Authentication and Session State**.
-ChurchServe now restores a server-managed cookie session before rendering navigation,
-provides a tested sign-in and sign-out experience, protects coordination APIs, and uses
-Angular's XSRF convention with server-side antiforgery validation for mutating requests.
+This repository currently represents **Part 14: Route Guards, Resolvers, and Unsaved Changes**.
+ChurchServe now coordinates protected navigation with the server-managed session, returns
+signed-out users to their original URL, resolves required event data before activation, and
+warns before a dirty service-event form is discarded.
 
 ## Pinned toolchain
 
@@ -69,7 +69,7 @@ SQLite keeps schedule and volunteer data runnable without installing a database 
 The EF Core boundary remains provider-focused so a later part can replace SQLite with
 Microsoft SQL Server while preserving the HTTP contract and Angular repositories.
 
-## Verify Part 13
+## Verify Part 14
 
 ```bash
 dotnet test ChurchServe.slnx
@@ -80,10 +80,11 @@ npm run build
 The API integration tests use isolated in-memory SQLite databases to verify schedule
 filtering, deterministic paging, persistence, and the volunteer search contract.
 Angular tests protect session restoration, sign-in transitions, password handling,
-sign-out timing, content projection, URL query parsing, HTTP repositories, request
-states, debouncing, and cancellation. API integration tests exercise real antiforgery
-tokens, encrypted authentication cookies, protected endpoints, invalid credentials, and
-logout. The production build verifies strict TypeScript and Angular template compilation.
+sign-out timing, guarded redirects, safe return URLs, resolver outcomes, dirty-form
+navigation, content projection, URL query parsing, HTTP repositories, request states,
+debouncing, and cancellation. API integration tests exercise real antiforgery tokens,
+encrypted authentication cookies, protected endpoints, invalid credentials, and logout.
+The production build verifies strict TypeScript and Angular template compilation.
 
 ## Current structure
 
@@ -100,8 +101,11 @@ tests/
 src/app/
   core/
     auth/
+    routing/
   features/
     home/
+    navigation-unavailable/
+    not-found/
     sign-in/
     schedule/
       assignment.ts
@@ -113,6 +117,7 @@ src/app/
       service-event-repository.ts
       service-event-create/
       service-event-detail/
+        service-event.resolver.ts
       service-event-form/
     volunteers/
       api/

@@ -1,8 +1,9 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SessionStore } from '../../core/auth/session-store';
+import { safeReturnUrl } from '../../core/routing/safe-return-url';
 
 @Component({
   selector: 'app-sign-in',
@@ -14,6 +15,7 @@ import { SessionStore } from '../../core/auth/session-store';
 export class SignIn {
   private readonly sessionStore = inject(SessionStore);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal('');
@@ -36,7 +38,9 @@ export class SignIn {
     this.sessionStore.signIn(this.form.getRawValue()).subscribe({
       next: () => {
         this.form.controls.password.reset();
-        void this.router.navigateByUrl('/schedule');
+        void this.router.navigateByUrl(
+          safeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl')),
+        );
       },
       error: (error: unknown) => {
         this.isSubmitting.set(false);

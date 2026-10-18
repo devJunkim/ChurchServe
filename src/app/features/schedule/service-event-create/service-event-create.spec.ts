@@ -46,6 +46,26 @@ describe('ServiceEventCreate', () => {
       expect.objectContaining({ title: 'Prayer Night', location: 'Chapel' }),
     );
     expect(navigate).toHaveBeenCalledWith(['/schedule', 'event-1']);
+    expect(form.form.pristine).toBe(true);
+  });
+
+  it('reports unsaved changes only while the form is dirty', () => {
+    const repository = {
+      list: vi.fn(),
+      findById: vi.fn(),
+      create: vi.fn(),
+    };
+    TestBed.configureTestingModule({
+      providers: [provideRouter([]), { provide: ServiceEventRepository, useValue: repository }],
+    });
+    const fixture = TestBed.createComponent(ServiceEventCreate);
+    fixture.detectChanges();
+    const form = fixture.debugElement.query(By.directive(ServiceEventForm))
+      .componentInstance as ServiceEventForm;
+
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
+    form.form.markAsDirty();
+    expect(fixture.componentInstance.hasUnsavedChanges()).toBe(true);
   });
 
   it('shows a recoverable error when persistence fails', () => {

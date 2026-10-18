@@ -48,6 +48,29 @@ describe('SessionStore', () => {
     expect(store.session()).toMatchObject({ status: 'unavailable' });
   });
 
+  it('shares one restore request while multiple guards wait for the session', async () => {
+    const first = firstValueFrom(store.ensureRestored());
+    const second = firstValueFrom(store.ensureRestored());
+    const requests = http.match('/api/session');
+
+    expect(requests).toHaveLength(1);
+    requests[0].flush(user);
+
+    await expect(first).resolves.toEqual({ status: 'authenticated', user });
+    await expect(second).resolves.toEqual({ status: 'authenticated', user });
+  });
+
+  it('returns a known session without another HTTP request', async () => {
+    const restore = firstValueFrom(store.restore());
+    http.expectOne('/api/session').flush(null, { status: 401, statusText: 'Unauthorized' });
+    await restore;
+
+    await expect(firstValueFrom(store.ensureRestored())).resolves.toEqual({
+      status: 'anonymous',
+    });
+    http.expectNone('/api/session');
+  });
+
   it('signs in without retaining the password in session state', async () => {
     const result = firstValueFrom(
       store.signIn({ email: user.email, password: 'ChurchServeDemo!13' }),

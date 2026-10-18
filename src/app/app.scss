@@ -98,6 +98,16 @@ nav {
   text-align: right;
 }
 
+.navigation-progress {
+  margin: 0;
+  padding: 0.45rem clamp(1rem, 4vw, 4rem);
+  background: #e6fcf5;
+  color: #087f5b;
+  font-size: 0.9rem;
+  font-weight: 750;
+  text-align: center;
+}
+
 nav a {
   padding: 0.65rem 0.85rem;
   border-radius: 0.5rem;
