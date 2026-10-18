@@ -1,11 +1,11 @@
 import { inject } from '@angular/core';
 import { RedirectCommand, ResolveFn, Router } from '@angular/router';
 import { catchError, map, of } from 'rxjs';
-import { ServiceEventRepository } from '../service-event-repository';
+import { ScheduleStore } from '../schedule-store';
 import { ServiceEvent } from '../service-event';
 
 export const serviceEventResolver: ResolveFn<ServiceEvent | RedirectCommand> = (route, state) => {
-  const repository = inject(ServiceEventRepository);
+  const store = inject(ScheduleStore);
   const router = inject(Router);
   const id = route.paramMap.get('eventId');
 
@@ -13,7 +13,7 @@ export const serviceEventResolver: ResolveFn<ServiceEvent | RedirectCommand> = (
     return new RedirectCommand(router.parseUrl('/not-found'));
   }
 
-  return repository.findById(id).pipe(
+  return store.findById(id).pipe(
     map((event) => event ?? new RedirectCommand(router.parseUrl('/not-found'))),
     catchError(() =>
       of(

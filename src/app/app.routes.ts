@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { signedInGuard } from './core/auth/signed-in.guard';
 import { unsavedChangesGuard } from './core/routing/unsaved-changes.guard';
 import { serviceEventResolver } from './features/schedule/service-event-detail/service-event.resolver';
+import { ScheduleStore } from './features/schedule/schedule-store';
 
 export const routes: Routes = [
   {
@@ -18,28 +19,33 @@ export const routes: Routes = [
   {
     path: 'schedule',
     canActivate: [signedInGuard],
-    loadComponent: () => import('./features/schedule/schedule').then((module) => module.Schedule),
-    title: 'Schedule | ChurchServe',
-  },
-  {
-    path: 'schedule/new',
-    canActivate: [signedInGuard],
-    canDeactivate: [unsavedChangesGuard],
-    loadComponent: () =>
-      import('./features/schedule/service-event-create/service-event-create').then(
-        (module) => module.ServiceEventCreate,
-      ),
-    title: 'Create service | ChurchServe',
-  },
-  {
-    path: 'schedule/:eventId',
-    canActivate: [signedInGuard],
-    resolve: { serviceEvent: serviceEventResolver },
-    loadComponent: () =>
-      import('./features/schedule/service-event-detail/service-event-detail').then(
-        (module) => module.ServiceEventDetail,
-      ),
-    title: 'Service details | ChurchServe',
+    providers: [ScheduleStore],
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/schedule/schedule').then((module) => module.Schedule),
+        title: 'Schedule | ChurchServe',
+      },
+      {
+        path: 'new',
+        canDeactivate: [unsavedChangesGuard],
+        loadComponent: () =>
+          import('./features/schedule/service-event-create/service-event-create').then(
+            (module) => module.ServiceEventCreate,
+          ),
+        title: 'Create service | ChurchServe',
+      },
+      {
+        path: ':eventId',
+        resolve: { serviceEvent: serviceEventResolver },
+        loadComponent: () =>
+          import('./features/schedule/service-event-detail/service-event-detail').then(
+            (module) => module.ServiceEventDetail,
+          ),
+        title: 'Service details | ChurchServe',
+      },
+    ],
   },
   {
     path: 'volunteers',

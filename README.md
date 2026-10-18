@@ -4,10 +4,11 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 14: Route Guards, Resolvers, and Unsaved Changes**.
-ChurchServe now coordinates protected navigation with the server-managed session, returns
-signed-out users to their original URL, resolves required event data before activation, and
-warns before a dirty service-event form is discarded.
+This repository currently represents **Part 15: Shared State with Signals**.
+ChurchServe now keeps schedule request state, cached events, and derived open-position totals
+in a route-scoped signal store shared by the schedule list, creation form, and detail resolver.
+The store avoids duplicate loads, cancels stale requests, and is discarded when the user leaves
+the schedule feature.
 
 ## Pinned toolchain
 
@@ -69,7 +70,7 @@ SQLite keeps schedule and volunteer data runnable without installing a database 
 The EF Core boundary remains provider-focused so a later part can replace SQLite with
 Microsoft SQL Server while preserving the HTTP contract and Angular repositories.
 
-## Verify Part 14
+## Verify Part 15
 
 ```bash
 dotnet test ChurchServe.slnx
@@ -79,7 +80,8 @@ npm run build
 
 The API integration tests use isolated in-memory SQLite databases to verify schedule
 filtering, deterministic paging, persistence, and the volunteer search contract.
-Angular tests protect session restoration, sign-in transitions, password handling,
+Angular tests protect route-scoped signal state, request deduplication, caching, derived values,
+session restoration, sign-in transitions, password handling,
 sign-out timing, guarded redirects, safe return URLs, resolver outcomes, dirty-form
 navigation, content projection, URL query parsing, HTTP repositories, request states,
 debouncing, and cancellation. API integration tests exercise real antiforgery tokens,
@@ -114,6 +116,7 @@ src/app/
       create-service-event-command.ts
       page.ts
       schedule-query.ts
+      schedule-store.ts
       service-event-repository.ts
       service-event-create/
       service-event-detail/

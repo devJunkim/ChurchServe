@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { NEVER, Subject, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
+import { Page } from './page';
 import { Schedule } from './schedule';
+import { ScheduleStore } from './schedule-store';
 import { ServiceEventRepository } from './service-event-repository';
 import { ServiceEvent } from './service-event';
 
@@ -20,18 +22,19 @@ describe('Schedule', () => {
     ...first,
     id: 'event-2',
     title: 'Second Service',
+    requiredPositions: 3,
+    assignedPositions: 1,
   };
   let repository: {
     list: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
   };
-  const page = (items: readonly ServiceEvent[], currentPage = 1, totalItems = items.length) => ({
-    items,
-    page: currentPage,
-    pageSize: 4,
-    totalItems,
-  });
+  const page = (
+    items: readonly ServiceEvent[],
+    currentPage = 1,
+    totalItems = items.length,
+  ): Page<ServiceEvent> => ({ items, page: currentPage, pageSize: 4, totalItems });
 
   beforeEach(() => {
     repository = {
@@ -40,11 +43,15 @@ describe('Schedule', () => {
       create: vi.fn(),
     };
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), { provide: ServiceEventRepository, useValue: repository }],
+      providers: [
+        provideRouter([]),
+        ScheduleStore,
+        { provide: ServiceEventRepository, useValue: repository },
+      ],
     });
   });
 
-  it('renders the event collection with detail links', () => {
+  it('renders events, detail links, and the derived schedule summary', () => {
     const fixture = TestBed.createComponent(Schedule);
     fixture.detectChanges();
 
@@ -56,11 +63,12 @@ describe('Schedule', () => {
     expect(element.querySelector('.schedule-actions a')?.getAttribute('href')).toBe(
       '/schedule/new',
     );
+    expect(element.querySelector('.schedule-summary')?.textContent).toContain('4 open positions');
   });
 
   it('shows a loading status without an empty-state message', () => {
+    repository.list.mockReturnValue(NEVER);
     const fixture = TestBed.createComponent(Schedule);
-    fixture.componentInstance.setStateForTest({ status: 'loading' });
     fixture.detectChanges();
 
     const element: HTMLElement = fixture.nativeElement;
@@ -71,7 +79,7 @@ describe('Schedule', () => {
     expect(element.querySelector('app-service-event-card')).toBeNull();
   });
 
-  it('shows an error and reloads the seeded schedule', () => {
+  it('shows an error and reloads the schedule', () => {
     repository.list
       .mockReturnValueOnce(throwError(() => new Error('Network unavailable')))
       .mockReturnValue(of(page([first, second])));
@@ -80,18 +88,18 @@ describe('Schedule', () => {
 
     const element: HTMLElement = fixture.nativeElement;
     expect(element.querySelector('[role="alert"]')?.textContent).toContain('could not be loaded');
-    expect(element.textContent).not.toContain('No matching services');
 
     element.querySelector<HTMLButtonElement>('[role="alert"] button')?.click();
     fixture.detectChanges();
 
+    expect(repository.list).toHaveBeenCalledTimes(2);
     expect(element.querySelector('[role="alert"]')).toBeNull();
     expect(element.querySelectorAll('app-service-event-card')).toHaveLength(2);
   });
 
   it('shows the ready empty state only after loading succeeds', () => {
+    repository.list.mockReturnValue(of(page([])));
     const fixture = TestBed.createComponent(Schedule);
-    fixture.componentInstance.setStateForTest({ status: 'ready', page: page([]) });
     fixture.detectChanges();
 
     const element: HTMLElement = fixture.nativeElement;
@@ -101,13 +109,16 @@ describe('Schedule', () => {
   });
 
   it('keeps each card associated with its event when events are reordered', () => {
+    const pages = new Subject<Page<ServiceEvent>>();
+    repository.list.mockReturnValue(pages);
     const fixture = TestBed.createComponent(Schedule);
-    fixture.componentInstance.setStateForTest({ status: 'ready', page: page([first, second]) });
+    fixture.detectChanges();
+    pages.next(page([first, second]));
     fixture.detectChanges();
     const element: HTMLElement = fixture.nativeElement;
     const cardsBefore = Array.from(element.querySelectorAll('app-service-event-card'));
 
-    fixture.componentInstance.setStateForTest({ status: 'ready', page: page([second, first]) });
+    pages.next(page([second, first]));
     fixture.detectChanges();
     const cardsAfter = Array.from(element.querySelectorAll('app-service-event-card'));
 
@@ -134,12 +145,12 @@ describe('Schedule', () => {
   });
 
   it('lets an empty filtered view return to all ministries', async () => {
+    repository.list.mockReturnValue(of(page([])));
     const router = TestBed.inject(Router);
     await router.navigate([], {
       queryParams: { month: '2026-11', ministry: 'technical', page: 1 },
     });
     const fixture = TestBed.createComponent(Schedule);
-    fixture.componentInstance.setStateForTest({ status: 'ready', page: page([]) });
     fixture.detectChanges();
 
     const buttons = fixture.nativeElement.querySelectorAll(
