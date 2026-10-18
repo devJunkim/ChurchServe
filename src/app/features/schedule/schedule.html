@@ -37,22 +37,31 @@
     </div>
   </app-panel>
 
-  @switch (state().status) {
+  @switch (store.loadState()) {
     @case ('loading') {
       <p class="state-panel" role="status">Loading service schedule…</p>
     }
 
-    @case ('error') {
+    @case ('failed') {
       <section class="state-panel error-state" role="alert">
         <h2>Schedule unavailable</h2>
-        <p>{{ errorMessage() }}</p>
+        <p>{{ store.loadError() }}</p>
         <button type="button" (click)="reload()">Try again</button>
       </section>
     }
 
-    @case ('ready') {
+    @case ('loaded') {
+      <section class="schedule-summary" aria-label="Current schedule summary">
+        <p>
+          <strong>{{ store.page()?.totalItems ?? 0 }}</strong> matching services
+        </p>
+        <p>
+          <strong>{{ store.totalOpenPositions() }}</strong> open positions on this page
+        </p>
+      </section>
+
       <div class="event-grid">
-        @for (event of events(); track event.id) {
+        @for (event of store.events(); track event.id) {
           <app-service-event-card [event]="event" />
         } @empty {
           <app-empty-state>
@@ -67,7 +76,7 @@
         }
       </div>
 
-      @if (page(); as currentPage) {
+      @if (store.page(); as currentPage) {
         <nav class="pagination" aria-label="Schedule pages">
           <button
             type="button"

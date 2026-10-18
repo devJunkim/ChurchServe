@@ -5,6 +5,7 @@ import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { ServiceEventForm } from '../service-event-form/service-event-form';
 import { ServiceEventRepository } from '../service-event-repository';
+import { ScheduleStore } from '../schedule-store';
 import { ServiceEventCreate } from './service-event-create';
 
 describe('ServiceEventCreate', () => {
@@ -25,7 +26,11 @@ describe('ServiceEventCreate', () => {
       ),
     };
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), { provide: ServiceEventRepository, useValue: repository }],
+      providers: [
+        provideRouter([]),
+        ScheduleStore,
+        { provide: ServiceEventRepository, useValue: repository },
+      ],
     });
     const router = TestBed.inject(Router);
     const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
@@ -56,7 +61,11 @@ describe('ServiceEventCreate', () => {
       create: vi.fn(),
     };
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), { provide: ServiceEventRepository, useValue: repository }],
+      providers: [
+        provideRouter([]),
+        ScheduleStore,
+        { provide: ServiceEventRepository, useValue: repository },
+      ],
     });
     const fixture = TestBed.createComponent(ServiceEventCreate);
     fixture.detectChanges();
@@ -75,7 +84,11 @@ describe('ServiceEventCreate', () => {
       create: () => throwError(() => new Error('Network unavailable')),
     };
     TestBed.configureTestingModule({
-      providers: [provideRouter([]), { provide: ServiceEventRepository, useValue: repository }],
+      providers: [
+        provideRouter([]),
+        ScheduleStore,
+        { provide: ServiceEventRepository, useValue: repository },
+      ],
     });
     const fixture = TestBed.createComponent(ServiceEventCreate);
     fixture.detectChanges();

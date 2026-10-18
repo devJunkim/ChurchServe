@@ -12,7 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { CreateServiceEventCommand } from '../create-service-event-command';
 import { ServiceEventForm } from '../service-event-form/service-event-form';
-import { ServiceEventRepository } from '../service-event-repository';
+import { ScheduleStore } from '../schedule-store';
 
 @Component({
   selector: 'app-service-event-create',
@@ -23,7 +23,7 @@ import { ServiceEventRepository } from '../service-event-repository';
 })
 export class ServiceEventCreate implements DirtyAware {
   private readonly router = inject(Router);
-  private readonly repository = inject(ServiceEventRepository);
+  private readonly store = inject(ScheduleStore);
   private readonly destroyRef = inject(DestroyRef);
   private readonly eventForm = viewChild(ServiceEventForm);
 
@@ -43,7 +43,7 @@ export class ServiceEventCreate implements DirtyAware {
 
   protected createEvent(command: CreateServiceEventCommand): void {
     this.saveError.set('');
-    this.repository
+    this.store
       .create(command)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
