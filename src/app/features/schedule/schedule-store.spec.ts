@@ -4,6 +4,7 @@ import { Subject, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { CreateServiceEventCommand } from './create-service-event-command';
 import { SessionState, SessionStore } from '../../core/auth/session-store';
+import { CACHE_CLOCK } from '../../core/data/cache-clock';
 import { Page } from './page';
 import { ScheduleQuery } from './schedule-query';
 import { ScheduleStore } from './schedule-store';
@@ -34,6 +35,7 @@ describe('ScheduleStore', () => {
     create: ReturnType<typeof vi.fn>;
   };
   let store: ScheduleStore;
+  let now: number;
   const session = signal<SessionState>({
     status: 'authenticated',
     user: {
@@ -45,6 +47,7 @@ describe('ScheduleStore', () => {
   });
 
   beforeEach(() => {
+    now = 1_000;
     session.set({
       status: 'authenticated',
       user: {
@@ -64,6 +67,7 @@ describe('ScheduleStore', () => {
         ScheduleStore,
         { provide: ServiceEventRepository, useValue: repository },
         { provide: SessionStore, useValue: { session: session.asReadonly() } },
+        { provide: CACHE_CLOCK, useValue: () => now },
       ],
     });
     store = TestBed.inject(ScheduleStore);
@@ -85,6 +89,22 @@ describe('ScheduleStore', () => {
     response.next(page([event]));
     store.load({ ...query });
     expect(repository.list).toHaveBeenCalledTimes(1);
+  });
+
+  it('reuses a recently loaded page when navigating between query keys', () => {
+    store.load(query);
+    store.load({ ...query, page: 2 });
+    store.load({ ...query });
+
+    expect(repository.list).toHaveBeenCalledTimes(2);
+  });
+
+  it('refreshes a page after its freshness window expires', () => {
+    store.load(query);
+    now += 30_001;
+    store.load({ ...query });
+
+    expect(repository.list).toHaveBeenCalledTimes(2);
   });
 
   it('cancels the previous request when the query changes', () => {
@@ -137,6 +157,32 @@ describe('ScheduleStore', () => {
     expect(repository.findById).not.toHaveBeenCalled();
   });
 
+  it('invalidates cached schedule pages after creating an event', () => {
+    store.load(query);
+    store
+      .create({
+        title: event.title,
+        startsAt: event.startsAt,
+        endsAt: event.endsAt,
+        location: event.location,
+      })
+      .subscribe();
+    store.load({ ...query });
+
+    expect(repository.list).toHaveBeenCalledTimes(2);
+  });
+
+  it('updates the visible summary and invalidates pages after an assignment', () => {
+    store.load(query);
+
+    store.synchronizeAssignmentSummary(event.id, 8, 2);
+
+    expect(store.events()[0]).toMatchObject({ assignedPositions: 8, version: 2 });
+    expect(store.totalOpenPositions()).toBe(2);
+    store.load({ ...query });
+    expect(repository.list).toHaveBeenCalledTimes(2);
+  });
+
   it('clears identity-bound state when the session becomes anonymous', () => {
     store.load(query);
 
@@ -148,5 +194,24 @@ describe('ScheduleStore', () => {
     expect(store.page()).toBeNull();
     store.findById(event.id).subscribe();
     expect(repository.findById).toHaveBeenCalledOnce();
+  });
+
+  it('clears identity-bound state when roles change for the same user', () => {
+    store.load(query);
+
+    session.set({
+      status: 'authenticated',
+      user: {
+        id: 'coordinator-1',
+        email: 'coordinator@churchserve.local',
+        displayName: 'Demo Coordinator',
+        roles: ['administrator'],
+      },
+    });
+    TestBed.tick();
+
+    expect(store.loadState()).toBe('idle');
+    store.load(query);
+    expect(repository.list).toHaveBeenCalledTimes(2);
   });
 });

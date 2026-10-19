@@ -1,5 +1,8 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Observable, Subject } from 'rxjs';
+import { SessionState, SessionStore } from '../../core/auth/session-store';
+import { CACHE_CLOCK } from '../../core/data/cache-clock';
 import { Volunteer } from '../../shared/domain/volunteer';
 import {
   Assignment,
@@ -46,13 +49,35 @@ describe('validateAssignment', () => {
 describe('AssignmentStore', () => {
   let repository: FakeAssignmentRepository;
   let store: AssignmentStore;
+  let now: number;
+  const session = signal<SessionState>({
+    status: 'authenticated',
+    user: {
+      id: 'coordinator-1',
+      email: 'coordinator@churchserve.local',
+      displayName: 'Demo Coordinator',
+      roles: ['scheduler'],
+    },
+  });
 
   beforeEach(() => {
+    now = 1_000;
+    session.set({
+      status: 'authenticated',
+      user: {
+        id: 'coordinator-1',
+        email: 'coordinator@churchserve.local',
+        displayName: 'Demo Coordinator',
+        roles: ['scheduler'],
+      },
+    });
     repository = new FakeAssignmentRepository();
     TestBed.configureTestingModule({
       providers: [
         AssignmentStore,
         { provide: AssignmentRepository, useValue: repository },
+        { provide: SessionStore, useValue: { session: session.asReadonly() } },
+        { provide: CACHE_CLOCK, useValue: () => now },
       ],
     });
     store = TestBed.inject(AssignmentStore);
@@ -69,6 +94,28 @@ describe('AssignmentStore', () => {
     expect(store.eventVersion()).toBe(3);
     expect(store.positions()).toEqual(positions);
     expect(store.openPositions()).toEqual(positions);
+  });
+
+  it('shares a pending load and reuses a fresh assignment board', () => {
+    store.load('event-1');
+    store.load('event-1');
+    expect(repository.loadResponses).toHaveLength(1);
+
+    repository.loadResponses[0].next(board());
+    repository.loadResponses[0].complete();
+    store.load('event-1');
+
+    expect(repository.loadResponses).toHaveLength(1);
+    expect(store.eventVersion()).toBe(3);
+  });
+
+  it('refreshes an assignment board after its freshness window expires', () => {
+    loadBoard(store, repository);
+    now += 15_001;
+
+    store.load('event-1');
+
+    expect(repository.loadResponses).toHaveLength(2);
   });
 
   it('exposes a recoverable loading error', () => {
@@ -121,10 +168,7 @@ describe('AssignmentStore', () => {
 
   it('rolls back only the failed optimistic operation', () => {
     const twoPositionBoard = board({
-      positions: [
-        ...positions,
-        { ...positions[0], id: 'camera-1', roleName: 'Camera operator' },
-      ],
+      positions: [...positions, { ...positions[0], id: 'camera-1', roleName: 'Camera operator' }],
     });
     loadBoard(store, repository, twoPositionBoard);
     store.assign('sound-1', 'alex');
@@ -135,6 +179,16 @@ describe('AssignmentStore', () => {
     expect(store.assignments()).toHaveLength(1);
     expect(store.assignments()[0].positionId).toBe('camera-1');
     expect(store.notice()).toContain('not saved');
+  });
+
+  it('reloads from the server after a failed mutation invalidates the board', () => {
+    loadBoard(store, repository);
+    store.assign('sound-1', 'alex');
+    repository.assignResponses[0].error(new Error('offline'));
+
+    store.load('event-1');
+
+    expect(repository.loadResponses).toHaveLength(2);
   });
 
   it('reconciles authoritative state after a conflict', () => {
@@ -168,6 +222,18 @@ describe('AssignmentStore', () => {
     loadBoard(store, repository);
 
     expect(store.volunteersFor(positions[0]).map((item) => item.id)).toEqual(['alex']);
+  });
+
+  it('clears cached assignment data when the authenticated identity changes', () => {
+    loadBoard(store, repository);
+
+    session.set({ status: 'anonymous' });
+    TestBed.tick();
+
+    expect(store.positions()).toEqual([]);
+    expect(store.assignments()).toEqual([]);
+    store.load('event-1');
+    expect(repository.loadResponses).toHaveLength(2);
   });
 });
 
