@@ -40,5 +40,78 @@
         </dd>
       </div>
     </dl>
+
+    <section class="assignment-board" aria-labelledby="assignment-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Volunteer assignments</p>
+          <h2 id="assignment-heading">Fill open ministry positions</h2>
+        </div>
+        @if (assignmentStore.eventVersion(); as version) {
+          <span class="version">Schedule version {{ version }}</span>
+        }
+      </div>
+
+      @if (assignmentStore.notice(); as notice) {
+        <p class="notice" aria-live="polite">{{ notice }}</p>
+      }
+
+      @if (assignmentStore.loading()) {
+        <p class="assignment-state" aria-live="polite">Loading assignments…</p>
+      } @else if (assignmentStore.loadError(); as error) {
+        <div class="assignment-state assignment-error" role="alert">
+          <p>{{ error }}</p>
+          <button type="button" (click)="assignmentStore.load(serviceEvent.id)">Try again</button>
+        </div>
+      } @else if (assignmentStore.positions().length === 0) {
+        <p class="assignment-state">No assignable positions are configured.</p>
+      } @else {
+        <ul class="position-list">
+          @for (position of assignmentStore.positions(); track position.id) {
+            <li>
+              <div class="position-copy">
+                <span class="ministry">{{ position.ministry }}</span>
+                <h3>{{ position.roleName }}</h3>
+                <p>
+                  {{ position.startsAt | date: 'shortTime' }}–{{ position.endsAt | date: 'shortTime' }}
+                </p>
+              </div>
+
+              @if (assignmentStore.assignmentFor(position.id); as assignment) {
+                <div class="assigned-volunteer">
+                  <strong>{{ assignment.volunteerDisplayName }}</strong>
+                  @if (assignment.syncStatus === 'pending') {
+                    <span class="saving" aria-live="polite">Saving…</span>
+                  } @else {
+                    <span>Confirmed</span>
+                  }
+                </div>
+              } @else {
+                <div class="assignment-action">
+                  <label [for]="'volunteer-' + position.id">Volunteer</label>
+                  <select
+                    [id]="'volunteer-' + position.id"
+                    [value]="selectedVolunteer(position.id)"
+                    (change)="selectVolunteer(position.id, $event)"
+                  >
+                    <option value="">Choose a volunteer</option>
+                    @for (volunteer of assignmentStore.volunteersFor(position); track volunteer.id) {
+                      <option [value]="volunteer.id">{{ volunteer.displayName }}</option>
+                    }
+                  </select>
+                  <button
+                    type="button"
+                    [disabled]="!selectedVolunteer(position.id)"
+                    (click)="assign(position.id)"
+                  >
+                    Assign
+                  </button>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </section>
   }
 </main>

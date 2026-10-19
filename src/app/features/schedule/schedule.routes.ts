@@ -1,7 +1,9 @@
 import { Routes } from '@angular/router';
 import { signedInGuard } from '../../core/auth/signed-in.guard';
 import { unsavedChangesGuard } from '../../core/routing/unsaved-changes.guard';
+import { provideAssignmentApi } from './api/provide-assignment-api';
 import { provideServiceEventApi } from './api/provide-service-event-api';
+import { AssignmentStore } from './assignment-store';
 import { serviceEventResolver } from './service-event-detail/service-event.resolver';
 import { ScheduleStore } from './schedule-store';
 
@@ -9,7 +11,7 @@ export const SCHEDULE_ROUTES: Routes = [
   {
     path: '',
     canActivate: [signedInGuard],
-    providers: [provideServiceEventApi(), ScheduleStore],
+    providers: [provideServiceEventApi(), provideAssignmentApi(), ScheduleStore, AssignmentStore],
     children: [
       {
         path: '',

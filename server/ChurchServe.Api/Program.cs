@@ -1,3 +1,4 @@
+using ChurchServe.Api.Assignments;
 using ChurchServe.Api.Authentication;
 using ChurchServe.Api.Data;
 using ChurchServe.Api.ServiceEvents;
@@ -66,6 +67,7 @@ app.UseAuthorization();
 
 app.MapSessionEndpoints();
 app.MapServiceEventEndpoints().RequireAuthorization();
+app.MapAssignmentEndpoints().RequireAuthorization();
 app.MapVolunteerEndpoints().RequireAuthorization();
 
 app.Run();

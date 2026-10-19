@@ -1,3 +1,4 @@
+using ChurchServe.Api.Assignments;
 using ChurchServe.Api.ServiceEvents;
 using ChurchServe.Api.Volunteers;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,8 @@ public sealed class ChurchServeDbContext(DbContextOptions<ChurchServeDbContext> 
   public DbSet<ServiceEventMinistry> ServiceEventMinistries => Set<ServiceEventMinistry>();
   public DbSet<Volunteer> Volunteers => Set<Volunteer>();
   public DbSet<VolunteerMinistry> VolunteerMinistries => Set<VolunteerMinistry>();
+  public DbSet<MinistryPosition> MinistryPositions => Set<MinistryPosition>();
+  public DbSet<Assignment> Assignments => Set<Assignment>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
@@ -20,6 +23,7 @@ public sealed class ChurchServeDbContext(DbContextOptions<ChurchServeDbContext> 
     serviceEvent.Property(item => item.Id).HasMaxLength(64);
     serviceEvent.Property(item => item.Title).HasMaxLength(200);
     serviceEvent.Property(item => item.Location).HasMaxLength(200);
+    serviceEvent.Property(item => item.Version).IsConcurrencyToken();
 
     var serviceEventMinistry = modelBuilder.Entity<ServiceEventMinistry>();
     serviceEventMinistry.ToTable("ServiceEventMinistries");
@@ -46,5 +50,38 @@ public sealed class ChurchServeDbContext(DbContextOptions<ChurchServeDbContext> 
         .WithMany(item => item.EligibleMinistries)
         .HasForeignKey(item => item.VolunteerId)
         .OnDelete(DeleteBehavior.Cascade);
+
+    var position = modelBuilder.Entity<MinistryPosition>();
+    position.ToTable("MinistryPositions");
+    position.HasKey(item => item.Id);
+    position.Property(item => item.Id).HasMaxLength(64);
+    position.Property(item => item.ServiceEventId).HasMaxLength(64);
+    position.Property(item => item.Ministry).HasMaxLength(100);
+    position.Property(item => item.RoleName).HasMaxLength(200);
+    position.HasOne(item => item.ServiceEvent)
+        .WithMany()
+        .HasForeignKey(item => item.ServiceEventId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+    var assignment = modelBuilder.Entity<Assignment>();
+    assignment.ToTable("Assignments");
+    assignment.HasKey(item => item.Id);
+    assignment.Property(item => item.Id).HasMaxLength(64);
+    assignment.Property(item => item.PositionId).HasMaxLength(64);
+    assignment.Property(item => item.VolunteerId).HasMaxLength(64);
+    assignment.Property(item => item.ClientRequestId).HasMaxLength(64);
+    assignment.Property(item => item.Status).HasMaxLength(32);
+    assignment.HasIndex(item => item.ClientRequestId).IsUnique();
+    assignment.HasIndex(item => item.PositionId)
+        .IsUnique()
+        .HasFilter("Status <> 'declined'");
+    assignment.HasOne(item => item.Position)
+        .WithMany(item => item.Assignments)
+        .HasForeignKey(item => item.PositionId)
+        .OnDelete(DeleteBehavior.Cascade);
+    assignment.HasOne(item => item.Volunteer)
+        .WithMany()
+        .HasForeignKey(item => item.VolunteerId)
+        .OnDelete(DeleteBehavior.Restrict);
   }
 }

@@ -6,6 +6,8 @@ import { of } from 'rxjs';
 import { SessionState, SessionStore } from './core/auth/session-store';
 import { NavigationUnavailable } from './features/navigation-unavailable/navigation-unavailable';
 import { NotFound } from './features/not-found/not-found';
+import { AssignmentRepository } from './features/schedule/assignment-repository';
+import { AssignmentStore } from './features/schedule/assignment-store';
 import { ServiceEventCreate } from './features/schedule/service-event-create/service-event-create';
 import { ServiceEventDetail } from './features/schedule/service-event-detail/service-event-detail';
 import { ServiceEventRepository } from './features/schedule/service-event-repository';
@@ -75,6 +77,7 @@ describe('application routes', () => {
 
   it('keeps schedule state outside the root injector', () => {
     expect(() => TestBed.inject(ScheduleStore)).toThrow();
+    expect(() => TestBed.inject(AssignmentStore)).toThrow();
   });
 
   it('opens a service detail route with its ID', async () => {
@@ -149,7 +152,25 @@ function routesWithServiceEventRepository(repository: ServiceEventRepository): R
           loadChildren: async () =>
             SCHEDULE_ROUTES.map((featureRoute) => ({
               ...featureRoute,
-              providers: [ScheduleStore, { provide: ServiceEventRepository, useValue: repository }],
+              providers: [
+                ScheduleStore,
+                AssignmentStore,
+                { provide: ServiceEventRepository, useValue: repository },
+                {
+                  provide: AssignmentRepository,
+                  useValue: {
+                    loadBoard: (eventId: string) =>
+                      of({
+                        eventId,
+                        eventVersion: 1,
+                        assignedPositions: 7,
+                        positions: [],
+                        volunteers: [],
+                        assignments: [],
+                      }),
+                  },
+                },
+              ],
             })),
         }
       : route,
