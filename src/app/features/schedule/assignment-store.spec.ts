@@ -221,7 +221,24 @@ describe('AssignmentStore', () => {
     );
     loadBoard(store, repository);
 
-    expect(store.volunteersFor(positions[0]).map((item) => item.id)).toEqual(['alex']);
+    const firstRead = store.volunteersFor(positions[0]);
+    const secondRead = store.volunteersFor(positions[0]);
+
+    expect(firstRead.map((item) => item.id)).toEqual(['alex']);
+    expect(secondRead).toBe(firstRead);
+  });
+
+  it('indexes active assignments by position', () => {
+    const declined: Assignment = {
+      ...confirmed,
+      id: 'declined-1',
+      positionId: 'camera-1',
+      status: 'declined',
+    };
+    loadBoard(store, repository, board({ assignments: [confirmed, declined] }));
+
+    expect(store.assignmentFor('sound-1')).toBe(confirmed);
+    expect(store.assignmentFor('camera-1')).toBeUndefined();
   });
 
   it('clears cached assignment data when the authenticated identity changes', () => {

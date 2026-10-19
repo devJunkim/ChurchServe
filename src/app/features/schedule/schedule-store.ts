@@ -2,12 +2,13 @@ import { DestroyRef, Injectable, computed, effect, inject, signal } from '@angul
 import { Observable, Subscription, tap } from 'rxjs';
 import { CACHE_CLOCK } from '../../core/data/cache-clock';
 import { RequestCache } from '../../core/data/request-cache';
+import { reconcileByKey } from '../../core/data/reconcile-by-key';
 import { SessionStore } from '../../core/auth/session-store';
 import { CreateServiceEventCommand } from './create-service-event-command';
 import { Page } from './page';
 import { equalScheduleQuery, scheduleQueryCacheKey, ScheduleQuery } from './schedule-query';
 import { ServiceEventRepository } from './service-event-repository';
-import { ServiceEvent } from './service-event';
+import { equalServiceEvent, ServiceEvent } from './service-event';
 
 export type ScheduleLoadState = 'idle' | 'loading' | 'loaded' | 'failed';
 
@@ -77,8 +78,15 @@ export class ScheduleStore {
       .getOrLoad(cacheKey, () => this.repository.list(query), force)
       .subscribe({
         next: (page) => {
-          this.pageValue.set(page);
-          this.cacheEvents(page.items);
+          const items = reconcileByKey(
+            this.pageValue()?.items ?? [],
+            page.items,
+            (event) => event.id,
+            equalServiceEvent,
+          );
+          const reconciledPage = items === page.items ? page : { ...page, items };
+          this.pageValue.set(reconciledPage);
+          this.cacheEvents(items);
           this.loadStateValue.set('loaded');
         },
         error: () => {

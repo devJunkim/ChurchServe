@@ -10,6 +10,8 @@ import { ScheduleStore } from './schedule-store';
 
 export type AssignmentValidation = { valid: true } | { valid: false; message: string };
 
+const NO_VOLUNTEERS: readonly Volunteer[] = [];
+
 @Injectable()
 export class AssignmentStore {
   private readonly repository = inject(AssignmentRepository);
@@ -53,6 +55,28 @@ export class AssignmentStore {
   readonly loading = this.loadingState.asReadonly();
   readonly loadError = this.loadErrorState.asReadonly();
   readonly notice = this.noticeState.asReadonly();
+
+  private readonly assignmentsByPosition = computed(() => {
+    const result = new Map<string, Assignment>();
+    for (const assignment of this.assignmentsState()) {
+      if (assignment.status !== 'declined') {
+        result.set(assignment.positionId, assignment);
+      }
+    }
+    return result;
+  });
+
+  private readonly volunteersByMinistry = computed(() => {
+    const result = new Map<string, Volunteer[]>();
+    for (const volunteer of this.volunteersState()) {
+      for (const ministry of volunteer.eligibleMinistries) {
+        const volunteers = result.get(ministry) ?? [];
+        volunteers.push(volunteer);
+        result.set(ministry, volunteers);
+      }
+    }
+    return result;
+  });
 
   readonly openPositions = computed(() => {
     const assignedIds = new Set(
@@ -191,15 +215,11 @@ export class AssignmentStore {
   }
 
   assignmentFor(positionId: string): Assignment | undefined {
-    return this.assignmentsState().find(
-      (assignment) => assignment.positionId === positionId && assignment.status !== 'declined',
-    );
+    return this.assignmentsByPosition().get(positionId);
   }
 
   volunteersFor(position: MinistryPosition): readonly Volunteer[] {
-    return this.volunteersState().filter((volunteer) =>
-      volunteer.eligibleMinistries.includes(position.ministry),
-    );
+    return this.volunteersByMinistry().get(position.ministry) ?? NO_VOLUNTEERS;
   }
 
   private applyBoard(board: AssignmentBoard): void {

@@ -107,6 +107,25 @@ describe('ScheduleStore', () => {
     expect(repository.list).toHaveBeenCalledTimes(2);
   });
 
+  it('preserves unchanged event objects when a refreshed page changes one event', () => {
+    const second = { ...event, id: 'event-2', title: 'Evening Service' };
+    repository.list
+      .mockReturnValueOnce(of(page([event, second])))
+      .mockReturnValueOnce(
+        of(page([{ ...event }, { ...second, assignedPositions: 8, version: 2 }])),
+      );
+    store.load(query);
+    const before = store.events();
+
+    store.load(query, true);
+    const after = store.events();
+
+    expect(after).not.toBe(before);
+    expect(after[0]).toBe(before[0]);
+    expect(after[1]).not.toBe(before[1]);
+    expect(after[1]).toMatchObject({ assignedPositions: 8, version: 2 });
+  });
+
   it('cancels the previous request when the query changes', () => {
     const firstResponse = new Subject<Page<ServiceEvent>>();
     const secondResponse = new Subject<Page<ServiceEvent>>();
