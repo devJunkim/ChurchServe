@@ -4,11 +4,11 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 19: Caching and Request Coordination**.
-The Angular schedule feature now shares duplicate in-flight reads and retains a small number of
-fresh schedule pages, event details, and assignment boards. Each resource has an explicit lifetime
-and capacity. Mutations invalidate or synchronize related entries, and authentication or role
-changes clear identity-bound state.
+This repository currently represents **Part 20: Rendering Performance for Large Schedules**.
+The Angular schedule feature now reconciles refreshed pages by stable event ID so unchanged event
+objects keep their identity. Assignment lookups and eligible-volunteer lists are computed once per
+state change instead of scanning or allocating during every template check. Existing `OnPush`,
+stable `track` expressions, lazy routes, and server pagination remain the primary rendering bounds.
 
 ## Pinned toolchain
 
@@ -72,7 +72,7 @@ SQLite keeps schedule and volunteer data runnable without installing a database 
 The EF Core boundary remains provider-focused so a later part can replace SQLite with
 Microsoft SQL Server while preserving the HTTP contract and Angular repositories.
 
-## Verify Part 19
+## Verify Part 20
 
 ```bash
 dotnet test ChurchServe.slnx
@@ -87,15 +87,16 @@ filtering, deterministic paging, persistence, the volunteer search contract, ass
 queries, version conflicts, idempotent retries, eligibility, occupied positions, and overlapping
 volunteer assignments.
 Angular tests protect lazy route activation, route-scoped state recreation, in-flight request
-sharing, bounded expiry-based caching, LRU eviction, mutation invalidation, derived values,
+sharing, bounded expiry-based caching, LRU eviction, mutation invalidation, stable event identity,
+memoized assignment lookups and eligible-volunteer collections, derived values,
 session restoration, sign-in transitions, password handling,
 sign-out timing, guarded redirects, safe return URLs, resolver outcomes, dirty-form
 navigation, content projection, URL query parsing, HTTP repositories, request states,
 debouncing, and cancellation. API integration tests exercise real antiforgery tokens,
 encrypted authentication cookies, protected endpoints, invalid credentials, logout, and assignment
-mutations. Part 19 tests also verify normalized cache keys, failed-request recovery, page and detail
-freshness, assignment-board refresh, role-aware clearing, optimistic confirmation, operation-scoped
-rollback, conflict reconciliation, DTO validation, and the rendered pending state.
+mutations. Part 20 tests also verify keyed reconciliation across unchanged, updated, reordered, and
+empty collections while retaining the existing normalized cache-key, failed-request recovery,
+freshness, role-aware clearing, optimistic confirmation, rollback, conflict, and DTO coverage.
 The production build verifies strict TypeScript and Angular template compilation.
 
 ## Current structure
