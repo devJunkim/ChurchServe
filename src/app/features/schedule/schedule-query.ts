@@ -39,6 +39,11 @@ export function equalScheduleQuery(left: ScheduleQuery, right: ScheduleQuery): b
   );
 }
 
+export function scheduleQueryCacheKey(query: ScheduleQuery): string {
+  const ministry = query.ministry?.trim().toLowerCase() ?? '';
+  return `${query.month}|${ministry}|${query.page}|${query.pageSize}`;
+}
+
 function isMonth(value: string | null): value is string {
   return value !== null && /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
 }

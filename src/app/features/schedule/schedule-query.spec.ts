@@ -1,5 +1,5 @@
 import { convertToParamMap } from '@angular/router';
-import { parseScheduleQuery } from './schedule-query';
+import { parseScheduleQuery, scheduleQueryCacheKey } from './schedule-query';
 
 describe('parseScheduleQuery', () => {
   const now = new Date(2026, 9, 17);
@@ -25,5 +25,24 @@ describe('parseScheduleQuery', () => {
     );
 
     expect(query).toEqual({ month: '2026-10', ministry: null, page: 1, pageSize: 4 });
+  });
+});
+
+describe('scheduleQueryCacheKey', () => {
+  it('normalizes ministry casing and whitespace', () => {
+    expect(
+      scheduleQueryCacheKey({
+        month: '2026-11',
+        ministry: ' Technical ',
+        page: 2,
+        pageSize: 4,
+      }),
+    ).toBe('2026-11|technical|2|4');
+  });
+
+  it('keeps paging parameters in the key', () => {
+    expect(
+      scheduleQueryCacheKey({ month: '2026-11', ministry: null, page: 1, pageSize: 4 }),
+    ).not.toBe(scheduleQueryCacheKey({ month: '2026-11', ministry: null, page: 2, pageSize: 4 }));
   });
 });
