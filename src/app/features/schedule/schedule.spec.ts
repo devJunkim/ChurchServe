@@ -17,6 +17,7 @@ describe('Schedule', () => {
     location: 'Main Sanctuary',
     requiredPositions: 4,
     assignedPositions: 2,
+    version: 1,
   };
   const second: ServiceEvent = {
     ...first,
@@ -24,6 +25,7 @@ describe('Schedule', () => {
     title: 'Second Service',
     requiredPositions: 3,
     assignedPositions: 1,
+    version: 1,
   };
   let repository: {
     list: ReturnType<typeof vi.fn>;

@@ -1,3 +1,4 @@
+using ChurchServe.Api.Assignments;
 using ChurchServe.Api.ServiceEvents;
 using ChurchServe.Api.Volunteers;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,47 @@ public static class DatabaseInitializer
           CONSTRAINT "FK_VolunteerMinistries_Volunteers_VolunteerId"
             FOREIGN KEY ("VolunteerId") REFERENCES "Volunteers" ("Id") ON DELETE CASCADE
         );
+        """);
+    await dbContext.Database.ExecuteSqlRawAsync("""
+        CREATE TABLE IF NOT EXISTS "MinistryPositions" (
+          "Id" TEXT NOT NULL CONSTRAINT "PK_MinistryPositions" PRIMARY KEY,
+          "ServiceEventId" TEXT NOT NULL,
+          "Ministry" TEXT NOT NULL,
+          "RoleName" TEXT NOT NULL,
+          "StartsAt" TEXT NOT NULL,
+          "EndsAt" TEXT NOT NULL,
+          CONSTRAINT "FK_MinistryPositions_ServiceEvents_ServiceEventId"
+            FOREIGN KEY ("ServiceEventId") REFERENCES "ServiceEvents" ("Id") ON DELETE CASCADE
+        );
+        """);
+    await dbContext.Database.ExecuteSqlRawAsync("""
+        CREATE INDEX IF NOT EXISTS "IX_MinistryPositions_ServiceEventId"
+          ON "MinistryPositions" ("ServiceEventId");
+        """);
+    await dbContext.Database.ExecuteSqlRawAsync("""
+        CREATE TABLE IF NOT EXISTS "Assignments" (
+          "Id" TEXT NOT NULL CONSTRAINT "PK_Assignments" PRIMARY KEY,
+          "PositionId" TEXT NOT NULL,
+          "VolunteerId" TEXT NOT NULL,
+          "ClientRequestId" TEXT NOT NULL,
+          "Status" TEXT NOT NULL,
+          CONSTRAINT "FK_Assignments_MinistryPositions_PositionId"
+            FOREIGN KEY ("PositionId") REFERENCES "MinistryPositions" ("Id") ON DELETE CASCADE,
+          CONSTRAINT "FK_Assignments_Volunteers_VolunteerId"
+            FOREIGN KEY ("VolunteerId") REFERENCES "Volunteers" ("Id") ON DELETE RESTRICT
+        );
+        """);
+    await dbContext.Database.ExecuteSqlRawAsync("""
+        CREATE UNIQUE INDEX IF NOT EXISTS "IX_Assignments_ClientRequestId"
+          ON "Assignments" ("ClientRequestId");
+        """);
+    await dbContext.Database.ExecuteSqlRawAsync("""
+        CREATE UNIQUE INDEX IF NOT EXISTS "IX_Assignments_PositionId"
+          ON "Assignments" ("PositionId") WHERE "Status" <> 'declined';
+        """);
+    await dbContext.Database.ExecuteSqlRawAsync("""
+        CREATE INDEX IF NOT EXISTS "IX_Assignments_VolunteerId"
+          ON "Assignments" ("VolunteerId");
         """);
 
     if (!await dbContext.ServiceEvents.AnyAsync())
@@ -84,6 +126,39 @@ public static class DatabaseInitializer
           CreateServiceEventMinistry("rehearsal-2026-11-05", "worship"));
     }
 
+    if (!await dbContext.MinistryPositions.AnyAsync())
+    {
+      dbContext.MinistryPositions.AddRange(
+          CreatePosition(
+              "sunday-welcome-host",
+              "sunday-2026-11-01",
+              "welcome",
+              "Welcome host",
+              "2026-11-01T09:30:00-05:00",
+              "2026-11-01T11:30:00-05:00"),
+          CreatePosition(
+              "sunday-worship-vocal",
+              "sunday-2026-11-01",
+              "worship",
+              "Vocalist",
+              "2026-11-01T09:00:00-05:00",
+              "2026-11-01T11:30:00-05:00"),
+          CreatePosition(
+              "rehearsal-sound",
+              "rehearsal-2026-11-05",
+              "technical",
+              "Sound operator",
+              "2026-11-05T18:45:00-05:00",
+              "2026-11-05T20:30:00-05:00"),
+          CreatePosition(
+              "rehearsal-keys",
+              "rehearsal-2026-11-05",
+              "worship",
+              "Keys player",
+              "2026-11-05T18:45:00-05:00",
+              "2026-11-05T20:30:00-05:00"));
+    }
+
     await dbContext.SaveChangesAsync();
   }
 
@@ -111,5 +186,21 @@ public static class DatabaseInitializer
       {
         ServiceEventId = serviceEventId,
         Ministry = ministry,
+      };
+
+  private static MinistryPosition CreatePosition(
+      string id,
+      string serviceEventId,
+      string ministry,
+      string roleName,
+      string startsAt,
+      string endsAt) => new()
+      {
+        Id = id,
+        ServiceEventId = serviceEventId,
+        Ministry = ministry,
+        RoleName = roleName,
+        StartsAt = DateTimeOffset.Parse(startsAt).UtcDateTime,
+        EndsAt = DateTimeOffset.Parse(endsAt).UtcDateTime,
       };
 }

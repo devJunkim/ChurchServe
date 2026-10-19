@@ -25,6 +25,7 @@ export function parseServiceEvent(value: unknown): ServiceEvent {
     location: value.location,
     requiredPositions: value.requiredPositions,
     assignedPositions: value.assignedPositions,
+    version: value.version,
   };
 }
 

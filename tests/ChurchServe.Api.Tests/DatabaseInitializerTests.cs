@@ -18,6 +18,8 @@ public sealed class DatabaseInitializerTests
     Assert.Equal(4, await database.Context.ServiceEventMinistries.CountAsync());
     Assert.Equal(6, await database.Context.Volunteers.CountAsync());
     Assert.Equal(12, await database.Context.VolunteerMinistries.CountAsync());
+    Assert.Equal(4, await database.Context.MinistryPositions.CountAsync());
+    Assert.Empty(await database.Context.Assignments.ToArrayAsync());
   }
 
   [Fact]
@@ -32,6 +34,8 @@ public sealed class DatabaseInitializerTests
     Assert.Equal(4, await database.Context.ServiceEventMinistries.CountAsync());
     Assert.Equal(6, await database.Context.Volunteers.CountAsync());
     Assert.Equal(12, await database.Context.VolunteerMinistries.CountAsync());
+    Assert.Equal(4, await database.Context.MinistryPositions.CountAsync());
+    Assert.Empty(await database.Context.Assignments.ToArrayAsync());
   }
 
   [Fact]
@@ -66,6 +70,19 @@ public sealed class DatabaseInitializerTests
 
     Assert.False(await database.Context.VolunteerMinistries
         .AnyAsync(item => item.VolunteerId == "alex-morgan"));
+  }
+
+  [Fact]
+  public async Task Service_event_version_is_an_optimistic_concurrency_token()
+  {
+    await using var database = await TestDatabase.CreateAsync();
+
+    var version = database.Context.Model
+        .FindEntityType(typeof(ServiceEvent))!
+        .FindProperty(nameof(ServiceEvent.Version));
+
+    Assert.NotNull(version);
+    Assert.True(version.IsConcurrencyToken);
   }
 
   private sealed class TestDatabase : IAsyncDisposable

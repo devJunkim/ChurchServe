@@ -4,10 +4,11 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 17: Feature Architecture and Lazy Routes**.
-ChurchServe now lazy-loads schedule and volunteer route configurations, keeps feature repositories
-and state inside route-scoped injectors, and checks dependency direction with an executable
-architecture rule. Existing URLs and user behavior remain unchanged.
+This repository currently represents **Part 18: Optimistic Updates and Version Conflicts**.
+The service-detail page now loads assignable ministry positions and eligible volunteers, shows
+assignments immediately with a visible pending state, and reconciles each operation with the API.
+The API protects assignments with event versions, idempotency keys, eligibility and overlap checks,
+unique database constraints, and authoritative `409 Conflict` responses.
 
 ## Pinned toolchain
 
@@ -58,7 +59,9 @@ The ASP.NET Core server implements these endpoints:
 ```text
 GET  /api/service-events?month={YYYY-MM}&ministry={name}&page={number}&pageSize={number}
 GET  /api/service-events/{eventId}
+GET  /api/service-events/{eventId}/assignment-board
 POST /api/service-events
+POST /api/service-events/{eventId}/assignments
 GET  /api/volunteers?query={name}
 GET  /api/session
 POST /api/session/sign-in
@@ -69,7 +72,7 @@ SQLite keeps schedule and volunteer data runnable without installing a database 
 The EF Core boundary remains provider-focused so a later part can replace SQLite with
 Microsoft SQL Server while preserving the HTTP contract and Angular repositories.
 
-## Verify Part 17
+## Verify Part 18
 
 ```bash
 dotnet test ChurchServe.slnx
@@ -80,14 +83,18 @@ npm run build
 ```
 
 The API integration tests use isolated in-memory SQLite databases to verify schedule
-filtering, deterministic paging, persistence, and the volunteer search contract.
+filtering, deterministic paging, persistence, the volunteer search contract, assignment-board
+queries, version conflicts, idempotent retries, eligibility, occupied positions, and overlapping
+volunteer assignments.
 Angular tests protect lazy route activation, route-scoped state recreation, request deduplication,
 caching, derived values,
 session restoration, sign-in transitions, password handling,
 sign-out timing, guarded redirects, safe return URLs, resolver outcomes, dirty-form
 navigation, content projection, URL query parsing, HTTP repositories, request states,
 debouncing, and cancellation. API integration tests exercise real antiforgery tokens,
-encrypted authentication cookies, protected endpoints, invalid credentials, and logout.
+encrypted authentication cookies, protected endpoints, invalid credentials, logout, and assignment
+mutations. Part 18 tests also verify optimistic confirmation, operation-scoped rollback, conflict
+reconciliation, DTO validation, and the rendered pending state.
 The production build verifies strict TypeScript and Angular template compilation.
 
 ## Current structure
@@ -95,6 +102,7 @@ The production build verifies strict TypeScript and Angular template compilation
 ```text
 server/
   ChurchServe.Api/
+    Assignments/
     Authentication/
     Data/
     ServiceEvents/
@@ -117,6 +125,7 @@ src/app/
     schedule/
       schedule.routes.ts
       assignment.ts
+      assignment-repository.ts
       assignment-store.ts
       api/
       create-service-event-command.ts

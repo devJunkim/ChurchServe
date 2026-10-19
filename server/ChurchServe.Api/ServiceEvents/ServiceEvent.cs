@@ -14,9 +14,9 @@ public sealed class ServiceEvent
 
   public int RequiredPositions { get; init; }
 
-  public int AssignedPositions { get; init; }
+  public int AssignedPositions { get; set; }
 
-  public int Version { get; init; }
+  public int Version { get; set; }
 
   public ICollection<ServiceEventMinistry> Ministries { get; } = [];
 }

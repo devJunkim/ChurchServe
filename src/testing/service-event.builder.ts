@@ -9,6 +9,7 @@ export function buildServiceEvent(overrides: Partial<ServiceEvent> = {}): Servic
     location: 'Main Sanctuary',
     requiredPositions: 10,
     assignedPositions: 7,
+    version: 1,
     ...overrides,
   };
 }
