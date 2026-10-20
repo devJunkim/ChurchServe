@@ -69,10 +69,12 @@ describe('HttpAssignmentRepository', () => {
       }),
     );
 
-    http.expectOne('/api/service-events/event-1/assignments').flush(
-      { message: 'The schedule changed.', board: boardDto('event-1') },
-      { status: 409, statusText: 'Conflict' },
-    );
+    http
+      .expectOne('/api/service-events/event-1/assignments')
+      .flush(
+        { message: 'The schedule changed.', board: boardDto('event-1') },
+        { status: 409, statusText: 'Conflict' },
+      );
 
     await expect(result).rejects.toBeInstanceOf(AssignmentConflictError);
     await expect(result).rejects.toMatchObject({
@@ -97,7 +99,7 @@ describe('HttpAssignmentRepository', () => {
       statusText: 'Server Error',
     });
 
-    await expect(result).rejects.toMatchObject({ status: 500 });
+    await expect(result).rejects.toMatchObject({ problem: { kind: 'unexpected' } });
   });
 });
 
@@ -124,9 +126,7 @@ function boardDto(eventId: string) {
         endsAt: '2026-11-01T16:30:00Z',
       },
     ],
-    volunteers: [
-      { id: 'alex', displayName: 'Alex Morgan', eligibleMinistries: ['technical'] },
-    ],
+    volunteers: [{ id: 'alex', displayName: 'Alex Morgan', eligibleMinistries: ['technical'] }],
     assignments: [assignmentDto],
   };
 }

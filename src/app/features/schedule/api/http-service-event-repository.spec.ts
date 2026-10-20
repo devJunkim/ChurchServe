@@ -85,7 +85,7 @@ describe('HttpServiceEventRepository', () => {
     await expect(result).resolves.toEqual(expect.objectContaining({ id: 'event-2' }));
   });
 
-  it('propagates a server validation error from create', async () => {
+  it('normalizes a server validation error from create', async () => {
     const command = {
       title: 'Prayer Night',
       startsAt: '2026-11-06T19:00:00.000Z',
@@ -97,11 +97,16 @@ describe('HttpServiceEventRepository', () => {
     http
       .expectOne('/api/service-events')
       .flush(
-        { message: 'The time range is invalid.' },
+        { errors: { endsAt: ['The time range is invalid.'] } },
         { status: 422, statusText: 'Unprocessable Entity' },
       );
 
-    await expect(result).rejects.toMatchObject({ status: 422 });
+    await expect(result).rejects.toEqual(
+      expect.objectContaining({
+        problem: { kind: 'validation', fields: { endsAt: 'The time range is invalid.' } },
+      }),
+    );
+    http.expectNone('/api/service-events');
   });
 
   it('rejects malformed API data', async () => {

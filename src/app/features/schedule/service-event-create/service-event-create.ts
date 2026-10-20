@@ -13,6 +13,7 @@ import { Router, RouterLink } from '@angular/router';
 import { CreateServiceEventCommand } from '../create-service-event-command';
 import { ServiceEventForm } from '../service-event-form/service-event-form';
 import { ScheduleStore } from '../schedule-store';
+import { toAppProblem, unexpectedProblemMessage } from '../../../core/http/app-problem';
 
 @Component({
   selector: 'app-service-event-create',
@@ -51,10 +52,31 @@ export class ServiceEventCreate implements DirtyAware {
           this.eventForm()?.form.markAsPristine();
           void this.router.navigate(['/schedule', event.id]);
         },
-        error: () =>
-          this.saveError.set(
-            'The event could not be created. Check your connection and try again.',
-          ),
+        error: (error: unknown) => {
+          const problem = toAppProblem(error);
+          if (problem.kind === 'validation' && Object.keys(problem.fields).length > 0) {
+            this.eventForm()?.applyServerErrors(problem.fields);
+            this.saveError.set('Review the highlighted fields and try again.');
+            return;
+          }
+
+          this.saveError.set(createEventMessage(problem));
+        },
       });
+  }
+}
+
+function createEventMessage(problem: ReturnType<typeof toAppProblem>): string {
+  switch (problem.kind) {
+    case 'unauthenticated':
+      return 'Your session expired. Sign in again before creating this event.';
+    case 'forbidden':
+      return 'Your account does not have permission to create service events.';
+    case 'conflict':
+      return 'The schedule changed while you were editing. Review it and try again.';
+    case 'unavailable':
+      return 'The event was not saved because the service is unavailable. Your entries are still here.';
+    default:
+      return unexpectedProblemMessage(problem, 'The event could not be created. Try again.');
   }
 }

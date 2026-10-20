@@ -4,11 +4,12 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 20: Rendering Performance for Large Schedules**.
-The Angular schedule feature now reconciles refreshed pages by stable event ID so unchanged event
-objects keep their identity. Assignment lookups and eligible-volunteer lists are computed once per
-state change instead of scanning or allocating during every template check. Existing `OnPush`,
-stable `track` expressions, lazy routes, and server pagination remain the primary rendering bounds.
+This repository currently represents **Part 21: Error Handling and Resilience**.
+Angular now translates transport failures into a small application-level problem model so each
+feature can distinguish validation, authentication, authorization, conflict, availability, and
+unexpected failures. Idempotent reads use bounded transient retries, writes remain explicit, server
+validation appears beside the affected form fields, and unexpected errors expose safe correlation
+references without logging request data.
 
 ## Pinned toolchain
 
@@ -72,7 +73,7 @@ SQLite keeps schedule and volunteer data runnable without installing a database 
 The EF Core boundary remains provider-focused so a later part can replace SQLite with
 Microsoft SQL Server while preserving the HTTP contract and Angular repositories.
 
-## Verify Part 20
+## Verify Part 21
 
 ```bash
 dotnet test ChurchServe.slnx
@@ -94,8 +95,10 @@ sign-out timing, guarded redirects, safe return URLs, resolver outcomes, dirty-f
 navigation, content projection, URL query parsing, HTTP repositories, request states,
 debouncing, and cancellation. API integration tests exercise real antiforgery tokens,
 encrypted authentication cookies, protected endpoints, invalid credentials, logout, and assignment
-mutations. Part 20 tests also verify keyed reconciliation across unchanged, updated, reordered, and
-empty collections while retaining the existing normalized cache-key, failed-request recovery,
+mutations. Part 21 tests also verify problem-detail normalization, correlation references, bounded
+transient-read retries, non-retryable failures, safe global reporting, field-level server validation,
+and session-expiry recovery while retaining keyed reconciliation across unchanged, updated,
+reordered, and empty collections plus the existing normalized cache-key, failed-request recovery,
 freshness, role-aware clearing, optimistic confirmation, rollback, conflict, and DTO coverage.
 The production build verifies strict TypeScript and Angular template compilation.
 
@@ -119,6 +122,8 @@ src/app/
   core/
     auth/
     data/
+    errors/
+    http/
     routing/
   features/
     home/

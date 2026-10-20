@@ -1,8 +1,9 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { catchError, finalize, map, Observable, of, shareReplay, tap } from 'rxjs';
 import { CurrentUser, SignInCommand } from './current-user';
 import { parseCurrentUser } from './session-dto';
+import { normalizeHttpProblem, toAppProblem } from '../http/app-problem';
 
 export type SessionState =
   | { status: 'checking' }
@@ -37,7 +38,7 @@ export class SessionStore {
       map(parseCurrentUser),
       map((user): SessionState => ({ status: 'authenticated', user })),
       catchError((error: unknown) => {
-        if (error instanceof HttpErrorResponse && error.status === 401) {
+        if (toAppProblem(error).kind === 'unauthenticated') {
           return of<SessionState>({ status: 'anonymous' });
         }
 
@@ -64,6 +65,7 @@ export class SessionStore {
       map(parseCurrentUser),
       tap((user) => this.state.set({ status: 'authenticated', user })),
       map(() => undefined),
+      normalizeHttpProblem(),
     );
   }
 
@@ -71,6 +73,7 @@ export class SessionStore {
     return this.http.delete<void>('/api/session').pipe(
       tap(() => this.state.set({ status: 'anonymous' })),
       map(() => undefined),
+      normalizeHttpProblem(),
     );
   }
 }
