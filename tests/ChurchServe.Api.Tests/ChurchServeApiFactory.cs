@@ -11,6 +11,12 @@ namespace ChurchServe.Api.Tests;
 public sealed class ChurchServeApiFactory : WebApplicationFactory<Program>
 {
   private SqliteConnection? connection;
+  private readonly string role;
+
+  public ChurchServeApiFactory(string role = "scheduler")
+  {
+    this.role = role;
+  }
 
   protected override void ConfigureWebHost(IWebHostBuilder builder)
   {
@@ -19,7 +25,7 @@ public sealed class ChurchServeApiFactory : WebApplicationFactory<Program>
     builder.UseSetting("Authentication:LocalAccount:Email", "coordinator@churchserve.local");
     builder.UseSetting("Authentication:LocalAccount:DisplayName", "Test Coordinator");
     builder.UseSetting("Authentication:LocalAccount:Password", "ChurchServeTest!13");
-    builder.UseSetting("Authentication:LocalAccount:Role", "scheduler");
+    builder.UseSetting("Authentication:LocalAccount:Role", role);
     builder.ConfigureServices(services =>
     {
       services.RemoveAll<DbContextOptions<ChurchServeDbContext>>();

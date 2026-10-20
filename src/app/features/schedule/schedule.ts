@@ -7,6 +7,8 @@ import { Panel } from '../../shared/ui/panel/panel';
 import { equalScheduleQuery, parseScheduleQuery, scheduleMinistries } from './schedule-query';
 import { ServiceEventCard } from './service-event-card/service-event-card';
 import { ScheduleStore } from './schedule-store';
+import { SessionStore } from '../../core/auth/session-store';
+import { hasPermission, PERMISSIONS } from '../../core/auth/current-user';
 
 @Component({
   selector: 'app-schedule',
@@ -19,9 +21,16 @@ export class Schedule {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly sessions = inject(SessionStore);
 
   protected readonly store = inject(ScheduleStore);
   protected readonly ministries = scheduleMinistries;
+  protected readonly canManageSchedule = computed(() => {
+    const session = this.sessions.session();
+    return (
+      session.status === 'authenticated' && hasPermission(session.user, PERMISSIONS.scheduleManage)
+    );
+  });
   protected readonly query = computed(
     () => this.store.query() ?? parseScheduleQuery(this.route.snapshot.queryParamMap),
   );

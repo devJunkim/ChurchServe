@@ -6,9 +6,11 @@
     refresh-safe.
   </p>
 
-  <div class="schedule-actions">
-    <a routerLink="/schedule/new">Create service</a>
-  </div>
+  @if (canManageSchedule()) {
+    <div class="schedule-actions">
+      <a routerLink="/schedule/new">Create service</a>
+    </div>
+  }
 
   <app-panel class="schedule-filters" tone="subtle">
     <span panel-title>Filter schedule</span>

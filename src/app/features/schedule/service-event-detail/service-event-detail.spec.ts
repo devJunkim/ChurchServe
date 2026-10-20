@@ -1,23 +1,33 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of, Subject } from 'rxjs';
-import {
-  AssignmentBoard,
-  AssignVolunteerCommand,
-  AssignVolunteerResult,
-} from '../assignment';
+import { AssignmentBoard, AssignVolunteerCommand, AssignVolunteerResult } from '../assignment';
 import { AssignmentRepository } from '../assignment-repository';
 import { AssignmentStore } from '../assignment-store';
 import { ServiceEvent } from '../service-event';
 import { ServiceEventDetail } from './service-event-detail';
+import { SessionState, SessionStore } from '../../../core/auth/session-store';
 
 describe('ServiceEventDetail assignments', () => {
+  const session = signal<SessionState>({
+    status: 'authenticated',
+    user: {
+      id: 'coordinator-1',
+      email: 'coordinator@churchserve.local',
+      displayName: 'Demo Coordinator',
+      roles: ['scheduler'],
+      permissions: ['schedule.read', 'schedule.manage', 'volunteer.read', 'volunteer.manage'],
+    },
+  });
+
   it('renders an optimistic assignment and then confirms it', () => {
     const repository = new DetailAssignmentRepository();
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
         AssignmentStore,
+        { provide: SessionStore, useValue: { session: session.asReadonly() } },
         { provide: AssignmentRepository, useValue: repository },
         {
           provide: ActivatedRoute,
@@ -66,6 +76,38 @@ describe('ServiceEventDetail assignments', () => {
     expect(fixture.nativeElement.textContent).toContain('Confirmed');
     expect(fixture.nativeElement.textContent).toContain('Schedule version 4');
   });
+
+  it('shows staffing without assignment controls to a read-only user', () => {
+    const repository = new DetailAssignmentRepository();
+    session.set({
+      status: 'authenticated',
+      user: {
+        id: 'reader-1',
+        email: 'reader@churchserve.local',
+        displayName: 'Schedule Reader',
+        roles: ['reader'],
+        permissions: ['schedule.read', 'volunteer.read'],
+      },
+    });
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        AssignmentStore,
+        { provide: SessionStore, useValue: { session: session.asReadonly() } },
+        { provide: AssignmentRepository, useValue: repository },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { data: { serviceEvent } }, data: of({ serviceEvent }) },
+        },
+      ],
+    });
+    const fixture = TestBed.createComponent(ServiceEventDetail);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('Unfilled');
+    expect(fixture.nativeElement.querySelector('[data-action="assign"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.assignment-action')).toBeNull();
+  });
 });
 
 const serviceEvent: ServiceEvent = {
@@ -93,9 +135,7 @@ const board: AssignmentBoard = {
       endsAt: '2026-11-01T16:30:00Z',
     },
   ],
-  volunteers: [
-    { id: 'alex', displayName: 'Alex Morgan', eligibleMinistries: ['technical'] },
-  ],
+  volunteers: [{ id: 'alex', displayName: 'Alex Morgan', eligibleMinistries: ['technical'] }],
   assignments: [],
 };
 

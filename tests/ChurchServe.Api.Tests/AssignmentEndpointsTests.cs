@@ -56,6 +56,22 @@ public sealed class AssignmentEndpointsTests
   }
 
   [Fact]
+  public async Task Reader_can_view_the_board_but_cannot_assign_a_volunteer()
+  {
+    using var factory = new ChurchServeApiFactory("reader");
+    using var client = await factory.CreateAuthenticatedClientAsync();
+
+    var boardResponse = await client.GetAsync(
+        "/api/service-events/rehearsal-2026-11-05/assignment-board");
+    var assignResponse = await client.PostAsJsonAsync(
+        "/api/service-events/rehearsal-2026-11-05/assignments",
+        ValidRequest());
+
+    Assert.Equal(HttpStatusCode.OK, boardResponse.StatusCode);
+    Assert.Equal(HttpStatusCode.Forbidden, assignResponse.StatusCode);
+  }
+
+  [Fact]
   public async Task Assign_creates_an_assignment_and_advances_the_event_version()
   {
     using var factory = new ChurchServeApiFactory();

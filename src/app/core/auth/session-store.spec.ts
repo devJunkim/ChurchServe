@@ -12,6 +12,7 @@ describe('SessionStore', () => {
     email: 'coordinator@churchserve.local',
     displayName: 'Demo Coordinator',
     roles: ['scheduler'],
+    permissions: ['schedule.read', 'schedule.manage', 'volunteer.read', 'volunteer.manage'],
   };
 
   beforeEach(() => {

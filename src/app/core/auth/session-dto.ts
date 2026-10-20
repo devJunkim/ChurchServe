@@ -1,4 +1,4 @@
-import { CurrentUser } from './current-user';
+import { CurrentUser, isPermission } from './current-user';
 
 export function parseCurrentUser(value: unknown): CurrentUser {
   if (
@@ -7,7 +7,9 @@ export function parseCurrentUser(value: unknown): CurrentUser {
     !isNonEmptyString(value['email']) ||
     !isNonEmptyString(value['displayName']) ||
     !Array.isArray(value['roles']) ||
-    !value['roles'].every((role) => typeof role === 'string' && role.length > 0)
+    !value['roles'].every((role) => typeof role === 'string' && role.length > 0) ||
+    !Array.isArray(value['permissions']) ||
+    !value['permissions'].every(isPermission)
   ) {
     throw new Error('The session response did not match the expected contract.');
   }
@@ -17,6 +19,7 @@ export function parseCurrentUser(value: unknown): CurrentUser {
     email: value['email'],
     displayName: value['displayName'],
     roles: value['roles'],
+    permissions: value['permissions'],
   };
 }
 

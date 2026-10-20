@@ -9,6 +9,17 @@ namespace ChurchServe.Api.Tests;
 public sealed class VolunteerEndpointsTests
 {
   [Fact]
+  public async Task Account_without_volunteer_permission_cannot_search_the_directory()
+  {
+    using var factory = new ChurchServeApiFactory("unknown");
+    using var client = await factory.CreateAuthenticatedClientAsync();
+
+    var response = await client.GetAsync("/api/volunteers?query=ann");
+
+    Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+  }
+
+  [Fact]
   public async Task Search_returns_case_insensitive_name_matches()
   {
     using var factory = new ChurchServeApiFactory();

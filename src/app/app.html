@@ -16,13 +16,15 @@
         >
           Schedule
         </a>
-        <a
-          routerLink="/volunteers"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: true }"
-        >
-          Volunteers
-        </a>
+        @if (canReadVolunteers()) {
+          <a
+            routerLink="/volunteers"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            Volunteers
+          </a>
+        }
       </nav>
       <span class="current-user">{{ user.displayName }}</span>
       <button type="button" class="sign-out" (click)="signOut()">Sign out</button>

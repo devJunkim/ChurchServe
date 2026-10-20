@@ -1,11 +1,34 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { SessionStore } from './core/auth/session-store';
 import { App } from './app';
+import { SessionState } from './core/auth/session-store';
 
 describe('App', () => {
+  const session = signal<SessionState>({
+    status: 'authenticated',
+    user: {
+      id: 'coordinator-1',
+      email: 'coordinator@churchserve.local',
+      displayName: 'Demo Coordinator',
+      roles: ['scheduler'],
+      permissions: ['schedule.read', 'schedule.manage', 'volunteer.read', 'volunteer.manage'],
+    },
+  });
+
   beforeEach(async () => {
+    session.set({
+      status: 'authenticated',
+      user: {
+        id: 'coordinator-1',
+        email: 'coordinator@churchserve.local',
+        displayName: 'Demo Coordinator',
+        roles: ['scheduler'],
+        permissions: ['schedule.read', 'schedule.manage', 'volunteer.read', 'volunteer.manage'],
+      },
+    });
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
@@ -13,15 +36,7 @@ describe('App', () => {
         {
           provide: SessionStore,
           useValue: {
-            session: signal({
-              status: 'authenticated',
-              user: {
-                id: 'coordinator-1',
-                email: 'coordinator@churchserve.local',
-                displayName: 'Demo Coordinator',
-                roles: ['scheduler'],
-              },
-            }),
+            session: session.asReadonly(),
             signOut: () => of(undefined),
           },
         },
@@ -46,5 +61,22 @@ describe('App', () => {
     const link: HTMLAnchorElement | null = fixture.nativeElement.querySelector('.skip-link');
     expect(link?.getAttribute('href')).toBe('#main-content');
   });
+
+  it('hides volunteer navigation without volunteer.read permission', () => {
+    session.set({
+      status: 'authenticated',
+      user: {
+        id: 'limited-1',
+        email: 'limited@churchserve.local',
+        displayName: 'Limited User',
+        roles: ['limited'],
+        permissions: ['schedule.read'],
+      },
+    });
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('nav a')).toHaveLength(1);
+    expect(fixture.nativeElement.textContent).not.toContain('Volunteers');
+  });
 });
-import { signal } from '@angular/core';

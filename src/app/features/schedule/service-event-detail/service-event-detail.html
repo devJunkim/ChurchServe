@@ -73,7 +73,9 @@
                 <span class="ministry">{{ position.ministry }}</span>
                 <h3>{{ position.roleName }}</h3>
                 <p>
-                  {{ position.startsAt | date: 'shortTime' }}–{{ position.endsAt | date: 'shortTime' }}
+                  {{ position.startsAt | date: 'shortTime' }}–{{
+                    position.endsAt | date: 'shortTime'
+                  }}
                 </p>
               </div>
 
@@ -86,7 +88,7 @@
                     <span>Confirmed</span>
                   }
                 </div>
-              } @else {
+              } @else if (canManageSchedule()) {
                 <div class="assignment-action">
                   <label [for]="'volunteer-' + position.id">Volunteer</label>
                   <select
@@ -95,18 +97,24 @@
                     (change)="selectVolunteer(position.id, $event)"
                   >
                     <option value="">Choose a volunteer</option>
-                    @for (volunteer of assignmentStore.volunteersFor(position); track volunteer.id) {
+                    @for (
+                      volunteer of assignmentStore.volunteersFor(position);
+                      track volunteer.id
+                    ) {
                       <option [value]="volunteer.id">{{ volunteer.displayName }}</option>
                     }
                   </select>
                   <button
                     type="button"
+                    data-action="assign"
                     [disabled]="!selectedVolunteer(position.id)"
                     (click)="assign(position.id)"
                   >
                     Assign
                   </button>
                 </div>
+              } @else {
+                <p class="assigned-volunteer">Unfilled</p>
               }
             </li>
           }
