@@ -46,13 +46,15 @@ public static class SessionEndpoints
             statusCode: StatusCodes.Status401Unauthorized);
       }
 
-      var claims = new[]
+      var claims = new List<Claim>
       {
         new Claim(ClaimTypes.NameIdentifier, account.Id),
         new Claim(ClaimTypes.Name, account.DisplayName),
         new Claim(ClaimTypes.Email, account.Email),
         new Claim(ClaimTypes.Role, account.Role),
       };
+      claims.AddRange(ChurchServePermissions.ForRole(account.Role)
+          .Select(permission => new Claim(ChurchServePermissions.ClaimType, permission)));
       var principal = new ClaimsPrincipal(
           new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
 
@@ -115,5 +117,10 @@ public static class SessionEndpoints
           principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty,
           principal.FindFirstValue(ClaimTypes.Email) ?? string.Empty,
           principal.Identity?.Name ?? string.Empty,
-          principal.FindAll(ClaimTypes.Role).Select(claim => claim.Value).ToArray());
+          principal.FindAll(ClaimTypes.Role).Select(claim => claim.Value).ToArray(),
+          principal.FindAll(ChurchServePermissions.ClaimType)
+              .Select(claim => claim.Value)
+              .Distinct(StringComparer.Ordinal)
+              .Order()
+              .ToArray());
 }

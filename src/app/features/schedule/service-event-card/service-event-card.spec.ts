@@ -49,4 +49,19 @@ describe('ServiceEventCard', () => {
     expect(fixture.nativeElement.textContent).toContain('Fully staffed');
     expect(fixture.nativeElement.textContent).not.toContain('open positions');
   });
+
+  it('renders hostile-looking event text as text rather than HTML', () => {
+    const fixture = TestBed.createComponent(ServiceEventCard);
+    fixture.componentRef.setInput('event', {
+      ...event,
+      title: '<img src=x onerror=alert(1)>',
+      location: '<script>alert(1)</script>',
+    });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('img')).toBeNull();
+    expect(fixture.nativeElement.querySelector('script')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('<img src=x onerror=alert(1)>');
+    expect(fixture.nativeElement.textContent).toContain('<script>alert(1)</script>');
+  });
 });

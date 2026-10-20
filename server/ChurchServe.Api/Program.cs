@@ -41,7 +41,7 @@ builder.Services
         return Task.CompletedTask;
       };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(ChurchServePermissions.Configure);
 builder.Services.AddAntiforgery(options =>
 {
   options.HeaderName = "X-XSRF-TOKEN";

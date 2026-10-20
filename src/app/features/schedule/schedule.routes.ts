@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { signedInGuard } from '../../core/auth/signed-in.guard';
 import { unsavedChangesGuard } from '../../core/routing/unsaved-changes.guard';
+import { permissionGuard } from '../../core/auth/permission.guard';
+import { PERMISSIONS } from '../../core/auth/current-user';
 import { provideAssignmentApi } from './api/provide-assignment-api';
 import { provideServiceEventApi } from './api/provide-service-event-api';
 import { AssignmentStore } from './assignment-store';
@@ -20,7 +22,9 @@ export const SCHEDULE_ROUTES: Routes = [
       },
       {
         path: 'new',
+        canActivate: [permissionGuard],
         canDeactivate: [unsavedChangesGuard],
+        data: { permission: PERMISSIONS.scheduleManage },
         loadComponent: () =>
           import('./service-event-create/service-event-create').then(
             (module) => module.ServiceEventCreate,

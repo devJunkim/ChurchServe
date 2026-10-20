@@ -4,12 +4,11 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 21: Error Handling and Resilience**.
-Angular now translates transport failures into a small application-level problem model so each
-feature can distinguish validation, authentication, authorization, conflict, availability, and
-unexpected failures. Idempotent reads use bounded transient retries, writes remain explicit, server
-validation appears beside the affected form fields, and unexpected errors expose safe correlation
-references without logging request data.
+This repository currently represents **Part 22: Security, Authorization, and Privacy**.
+The API now translates roles into explicit schedule and volunteer permissions, places those
+capabilities in the authenticated session, and enforces policy checks on every protected endpoint.
+Angular uses the same session permissions to hide unavailable actions and guard lazy routes, while
+the server remains the security boundary and returns `403 Forbidden` for unauthorized operations.
 
 ## Pinned toolchain
 
@@ -73,7 +72,7 @@ SQLite keeps schedule and volunteer data runnable without installing a database 
 The EF Core boundary remains provider-focused so a later part can replace SQLite with
 Microsoft SQL Server while preserving the HTTP contract and Angular repositories.
 
-## Verify Part 21
+## Verify Part 22
 
 ```bash
 dotnet test ChurchServe.slnx
@@ -87,7 +86,7 @@ The API integration tests use isolated in-memory SQLite databases to verify sche
 filtering, deterministic paging, persistence, the volunteer search contract, assignment-board
 queries, version conflicts, idempotent retries, eligibility, occupied positions, and overlapping
 volunteer assignments.
-Angular tests protect lazy route activation, route-scoped state recreation, in-flight request
+Angular tests protect lazy route activation, permission-aware navigation, route-scoped state recreation, in-flight request
 sharing, bounded expiry-based caching, LRU eviction, mutation invalidation, stable event identity,
 memoized assignment lookups and eligible-volunteer collections, derived values,
 session restoration, sign-in transitions, password handling,
@@ -97,7 +96,9 @@ debouncing, and cancellation. API integration tests exercise real antiforgery to
 encrypted authentication cookies, protected endpoints, invalid credentials, logout, and assignment
 mutations. Part 21 tests also verify problem-detail normalization, correlation references, bounded
 transient-read retries, non-retryable failures, safe global reporting, field-level server validation,
-and session-expiry recovery while retaining keyed reconciliation across unchanged, updated,
+and session-expiry recovery. Part 22 adds API denial tests for read-only and unknown roles, session
+permission-contract tests, hidden-action and route-guard tests, and a hostile-looking text rendering
+test. The suite retains keyed reconciliation across unchanged, updated,
 reordered, and empty collections plus the existing normalized cache-key, failed-request recovery,
 freshness, role-aware clearing, optimistic confirmation, rollback, conflict, and DTO coverage.
 The production build verifies strict TypeScript and Angular template compilation.

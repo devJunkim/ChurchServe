@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SessionStore } from './core/auth/session-store';
+import { hasPermission, PERMISSIONS } from './core/auth/current-user';
 
 @Component({
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
@@ -19,6 +20,9 @@ export class App {
     const session = this.session();
     return session.status === 'authenticated' ? session.user : null;
   });
+  protected readonly canReadVolunteers = computed(() =>
+    hasPermission(this.authenticatedUser(), PERMISSIONS.volunteerRead),
+  );
   protected readonly signOutError = signal('');
   protected readonly isNavigating = computed(() => this.router.currentNavigation() !== null);
 

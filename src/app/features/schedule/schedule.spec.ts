@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { NEVER, Subject, of, throwError } from 'rxjs';
@@ -7,6 +8,7 @@ import { Schedule } from './schedule';
 import { ScheduleStore } from './schedule-store';
 import { ServiceEventRepository } from './service-event-repository';
 import { ServiceEvent } from './service-event';
+import { SessionState, SessionStore } from '../../core/auth/session-store';
 
 describe('Schedule', () => {
   const first: ServiceEvent = {
@@ -32,6 +34,16 @@ describe('Schedule', () => {
     findById: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
   };
+  const session = signal<SessionState>({
+    status: 'authenticated',
+    user: {
+      id: 'coordinator-1',
+      email: 'coordinator@churchserve.local',
+      displayName: 'Demo Coordinator',
+      roles: ['scheduler'],
+      permissions: ['schedule.read', 'schedule.manage', 'volunteer.read', 'volunteer.manage'],
+    },
+  });
   const page = (
     items: readonly ServiceEvent[],
     currentPage = 1,
@@ -39,6 +51,16 @@ describe('Schedule', () => {
   ): Page<ServiceEvent> => ({ items, page: currentPage, pageSize: 4, totalItems });
 
   beforeEach(() => {
+    session.set({
+      status: 'authenticated',
+      user: {
+        id: 'coordinator-1',
+        email: 'coordinator@churchserve.local',
+        displayName: 'Demo Coordinator',
+        roles: ['scheduler'],
+        permissions: ['schedule.read', 'schedule.manage', 'volunteer.read', 'volunteer.manage'],
+      },
+    });
     repository = {
       list: vi.fn(() => of(page([first, second]))),
       findById: vi.fn((id: string) => of([first, second].find((event) => event.id === id))),
@@ -48,6 +70,7 @@ describe('Schedule', () => {
       providers: [
         provideRouter([]),
         ScheduleStore,
+        { provide: SessionStore, useValue: { session: session.asReadonly() } },
         { provide: ServiceEventRepository, useValue: repository },
       ],
     });
@@ -79,6 +102,23 @@ describe('Schedule', () => {
     );
     expect(element.textContent).not.toContain('No matching services');
     expect(element.querySelector('app-service-event-card')).toBeNull();
+  });
+
+  it('hides service creation from a read-only user', () => {
+    session.set({
+      status: 'authenticated',
+      user: {
+        id: 'reader-1',
+        email: 'reader@churchserve.local',
+        displayName: 'Schedule Reader',
+        roles: ['reader'],
+        permissions: ['schedule.read', 'volunteer.read'],
+      },
+    });
+    const fixture = TestBed.createComponent(Schedule);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.schedule-actions')).toBeNull();
   });
 
   it('shows an error and reloads the schedule', () => {

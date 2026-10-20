@@ -1,3 +1,5 @@
+using ChurchServe.Api.Authentication;
+
 namespace ChurchServe.Api.Volunteers;
 
 public static class VolunteerEndpoints
@@ -14,7 +16,7 @@ public static class VolunteerEndpoints
       return normalizedQuery.Length < 2
           ? Results.Ok(Array.Empty<VolunteerResponse>())
           : Results.Ok(await directory.SearchAsync(normalizedQuery, cancellationToken));
-    });
+    }).RequireAuthorization(ChurchServePermissions.VolunteerRead);
 
     return group;
   }

@@ -62,7 +62,7 @@ public static class ServiceEventEndpoints
           requestedPage,
           requestedPageSize,
           totalItems));
-    });
+    }).RequireAuthorization(ChurchServePermissions.ScheduleRead);
 
     group.MapGet("/{id}", async (string id, ChurchServeDbContext dbContext) =>
     {
@@ -73,7 +73,7 @@ public static class ServiceEventEndpoints
       return serviceEvent is null
               ? Results.NotFound()
               : Results.Ok(ToResponse(serviceEvent));
-    });
+    }).RequireAuthorization(ChurchServePermissions.ScheduleRead);
 
     group.MapPost("", async (CreateServiceEventRequest request, ChurchServeDbContext dbContext) =>
     {
@@ -101,7 +101,7 @@ public static class ServiceEventEndpoints
       return Results.Created(
               $"/api/service-events/{Uri.EscapeDataString(serviceEvent.Id)}",
               ToResponse(serviceEvent));
-    }).ValidateAntiforgery();
+    }).ValidateAntiforgery().RequireAuthorization(ChurchServePermissions.ScheduleManage);
 
     return group;
   }

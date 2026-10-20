@@ -26,6 +26,7 @@ describe('application routes', () => {
       email: 'coordinator@churchserve.local',
       displayName: 'Demo Coordinator',
       roles: ['scheduler'],
+      permissions: ['schedule.read', 'schedule.manage', 'volunteer.read', 'volunteer.manage'],
     },
   });
   const event = buildServiceEvent();
@@ -39,6 +40,7 @@ describe('application routes', () => {
         email: 'coordinator@churchserve.local',
         displayName: 'Demo Coordinator',
         roles: ['scheduler'],
+        permissions: ['schedule.read', 'schedule.manage', 'volunteer.read', 'volunteer.manage'],
       },
     });
     repository = new FakeServiceEventRepository([event]);
@@ -99,6 +101,26 @@ describe('application routes', () => {
 
     expect(component).toBeTruthy();
     expect(harness.routeNativeElement?.textContent).toContain('Create a service event');
+  });
+
+  it('redirects a reader away from the service creation route', async () => {
+    session.set({
+      status: 'authenticated',
+      user: {
+        id: 'reader-1',
+        email: 'reader@churchserve.local',
+        displayName: 'Schedule Reader',
+        roles: ['reader'],
+        permissions: ['schedule.read', 'volunteer.read'],
+      },
+    });
+    const harness = await RouterTestingHarness.create();
+    const router = TestBed.inject(Router);
+
+    await harness.navigateByUrl('/schedule/new', NavigationUnavailable);
+
+    expect(router.url).toBe('/unavailable');
+    expect(harness.routeNativeElement?.textContent).toContain('temporarily unavailable');
   });
 
   it('redirects an unknown event ID to the not-found page', async () => {

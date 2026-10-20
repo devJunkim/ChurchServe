@@ -314,7 +314,7 @@ function sessionCacheIdentity(session: ReturnType<SessionStore['session']>): str
     return session.status;
   }
 
-  return `${session.user.id}|${[...session.user.roles].sort().join(',')}`;
+  return `${session.user.id}|${[...session.user.permissions].sort().join(',')}`;
 }
 
 export function validateAssignment(

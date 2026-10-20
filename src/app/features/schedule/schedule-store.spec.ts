@@ -44,6 +44,7 @@ describe('ScheduleStore', () => {
       email: 'coordinator@churchserve.local',
       displayName: 'Demo Coordinator',
       roles: ['scheduler'],
+      permissions: ['schedule.read', 'schedule.manage', 'volunteer.read', 'volunteer.manage'],
     },
   });
 
@@ -56,6 +57,7 @@ describe('ScheduleStore', () => {
         email: 'coordinator@churchserve.local',
         displayName: 'Demo Coordinator',
         roles: ['scheduler'],
+        permissions: ['schedule.read', 'schedule.manage', 'volunteer.read', 'volunteer.manage'],
       },
     });
     repository = {
@@ -227,7 +229,7 @@ describe('ScheduleStore', () => {
     expect(repository.findById).toHaveBeenCalledOnce();
   });
 
-  it('clears identity-bound state when roles change for the same user', () => {
+  it('clears identity-bound state when permissions change for the same user', () => {
     store.load(query);
 
     session.set({
@@ -236,7 +238,8 @@ describe('ScheduleStore', () => {
         id: 'coordinator-1',
         email: 'coordinator@churchserve.local',
         displayName: 'Demo Coordinator',
-        roles: ['administrator'],
+        roles: ['scheduler'],
+        permissions: ['schedule.read'],
       },
     });
     TestBed.tick();

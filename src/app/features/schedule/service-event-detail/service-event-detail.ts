@@ -5,6 +5,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { AssignmentStore } from '../assignment-store';
 import { ServiceEvent } from '../service-event';
+import { SessionStore } from '../../../core/auth/session-store';
+import { hasPermission, PERMISSIONS } from '../../../core/auth/current-user';
 
 @Component({
   selector: 'app-service-event-detail',
@@ -16,7 +18,14 @@ import { ServiceEvent } from '../service-event';
 export class ServiceEventDetail {
   private readonly route = inject(ActivatedRoute);
   private readonly selectedVolunteerIds = signal<Readonly<Record<string, string>>>({});
+  private readonly sessions = inject(SessionStore);
   protected readonly assignmentStore = inject(AssignmentStore);
+  protected readonly canManageSchedule = computed(() => {
+    const session = this.sessions.session();
+    return (
+      session.status === 'authenticated' && hasPermission(session.user, PERMISSIONS.scheduleManage)
+    );
+  });
 
   protected readonly event = toSignal(
     this.route.data.pipe(map((data) => data['serviceEvent'] as ServiceEvent)),

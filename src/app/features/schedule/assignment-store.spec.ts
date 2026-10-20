@@ -57,6 +57,7 @@ describe('AssignmentStore', () => {
       email: 'coordinator@churchserve.local',
       displayName: 'Demo Coordinator',
       roles: ['scheduler'],
+      permissions: ['schedule.read', 'schedule.manage', 'volunteer.read', 'volunteer.manage'],
     },
   });
 
@@ -69,6 +70,7 @@ describe('AssignmentStore', () => {
         email: 'coordinator@churchserve.local',
         displayName: 'Demo Coordinator',
         roles: ['scheduler'],
+        permissions: ['schedule.read', 'schedule.manage', 'volunteer.read', 'volunteer.manage'],
       },
     });
     repository = new FakeAssignmentRepository();
@@ -245,6 +247,27 @@ describe('AssignmentStore', () => {
     loadBoard(store, repository);
 
     session.set({ status: 'anonymous' });
+    TestBed.tick();
+
+    expect(store.positions()).toEqual([]);
+    expect(store.assignments()).toEqual([]);
+    store.load('event-1');
+    expect(repository.loadResponses).toHaveLength(2);
+  });
+
+  it('clears cached assignment data when permissions change for the same user', () => {
+    loadBoard(store, repository);
+
+    session.set({
+      status: 'authenticated',
+      user: {
+        id: 'coordinator-1',
+        email: 'coordinator@churchserve.local',
+        displayName: 'Demo Coordinator',
+        roles: ['scheduler'],
+        permissions: ['schedule.read', 'volunteer.read'],
+      },
+    });
     TestBed.tick();
 
     expect(store.positions()).toEqual([]);

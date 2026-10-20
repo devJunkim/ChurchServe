@@ -158,6 +158,24 @@ public sealed class ServiceEventEndpointsTests
   }
 
   [Fact]
+  public async Task Reader_can_view_but_cannot_create_service_events()
+  {
+    using var factory = new ChurchServeApiFactory("reader");
+    using var client = await factory.CreateAuthenticatedClientAsync();
+    var request = new CreateServiceEventRequest(
+        "Unauthorized change",
+        DateTimeOffset.Parse("2026-12-24T18:00:00-05:00"),
+        DateTimeOffset.Parse("2026-12-24T19:30:00-05:00"),
+        "Room");
+
+    var listResponse = await client.GetAsync("/api/service-events");
+    var createResponse = await client.PostAsJsonAsync("/api/service-events", request);
+
+    Assert.Equal(HttpStatusCode.OK, listResponse.StatusCode);
+    Assert.Equal(HttpStatusCode.Forbidden, createResponse.StatusCode);
+  }
+
+  [Fact]
   public async Task Create_persists_and_returns_a_service_event()
   {
     using var factory = new ChurchServeApiFactory();

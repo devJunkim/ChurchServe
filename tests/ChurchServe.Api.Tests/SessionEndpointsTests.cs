@@ -43,6 +43,21 @@ public sealed class SessionEndpointsTests
     Assert.Equal("coordinator@churchserve.local", user.Email);
     Assert.Equal("Test Coordinator", user.DisplayName);
     Assert.Equal(["scheduler"], user.Roles);
+    Assert.Equal(
+        ["schedule.manage", "schedule.read", "volunteer.manage", "volunteer.read"],
+        user.Permissions);
+  }
+
+  [Fact]
+  public async Task Session_maps_a_reader_role_to_least_privilege_permissions()
+  {
+    using var factory = new ChurchServeApiFactory("reader");
+    using var client = await factory.CreateAuthenticatedClientAsync();
+
+    var user = await client.GetFromJsonAsync<SessionUserResponse>("/api/session");
+
+    Assert.Equal(["reader"], user!.Roles);
+    Assert.Equal(["schedule.read", "volunteer.read"], user.Permissions);
   }
 
   [Fact]
