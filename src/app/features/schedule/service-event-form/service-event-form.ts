@@ -33,6 +33,26 @@ export class ServiceEventForm {
     { validators: [validTimeRange] },
   );
 
+  applyServerErrors(fields: Readonly<Record<string, string>>): void {
+    for (const [field, message] of Object.entries(fields)) {
+      const control =
+        field === 'title'
+          ? this.form.controls.title
+          : field === 'startsAt'
+            ? this.form.controls.startsAt
+            : field === 'endsAt'
+              ? this.form.controls.endsAt
+              : field === 'location'
+                ? this.form.controls.location
+                : undefined;
+
+      if (control) {
+        control.setErrors({ ...control.errors, server: message });
+        control.markAsTouched();
+      }
+    }
+  }
+
   submit(): void {
     this.form.markAllAsTouched();
     if (this.form.invalid) {

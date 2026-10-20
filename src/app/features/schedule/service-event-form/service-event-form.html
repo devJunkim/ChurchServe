@@ -18,7 +18,9 @@
         [attr.aria-invalid]="form.controls.title.touched && form.controls.title.invalid"
       />
       @if (form.controls.title.touched && form.controls.title.invalid) {
-        <p id="service-title-error" class="field-error">Enter a service name.</p>
+        <p id="service-title-error" class="field-error">
+          {{ form.controls.title.getError('server') ?? 'Enter a service name.' }}
+        </p>
       }
     </div>
 
@@ -32,7 +34,9 @@
         [attr.aria-invalid]="form.controls.startsAt.touched && form.controls.startsAt.invalid"
       />
       @if (form.controls.startsAt.touched && form.controls.startsAt.invalid) {
-        <p class="field-error">Enter a valid start date and time.</p>
+        <p class="field-error">
+          {{ form.controls.startsAt.getError('server') ?? 'Enter a valid start date and time.' }}
+        </p>
       }
     </div>
 
@@ -46,7 +50,9 @@
         [attr.aria-invalid]="form.controls.endsAt.touched && form.controls.endsAt.invalid"
       />
       @if (form.controls.endsAt.touched && form.controls.endsAt.invalid) {
-        <p class="field-error">Enter a valid end date and time.</p>
+        <p class="field-error">
+          {{ form.controls.endsAt.getError('server') ?? 'Enter a valid end date and time.' }}
+        </p>
       }
     </div>
 
@@ -74,7 +80,9 @@
         [attr.aria-invalid]="form.controls.location.touched && form.controls.location.invalid"
       />
       @if (form.controls.location.touched && form.controls.location.invalid) {
-        <p id="service-location-error" class="field-error">Enter a service location.</p>
+        <p id="service-location-error" class="field-error">
+          {{ form.controls.location.getError('server') ?? 'Enter a service location.' }}
+        </p>
       }
     </div>
 

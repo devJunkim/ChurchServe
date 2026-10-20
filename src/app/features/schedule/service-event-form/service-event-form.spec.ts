@@ -68,4 +68,17 @@ describe('ServiceEventForm', () => {
       },
     ]);
   });
+
+  it('shows field errors returned by the server', () => {
+    const fixture = TestBed.createComponent(ServiceEventForm);
+    fixture.detectChanges();
+    fixture.componentInstance.applyServerErrors({
+      title: 'That service name is unavailable.',
+      unknown: 'Do not display this.',
+    });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('That service name is unavailable.');
+    expect(fixture.nativeElement.textContent).not.toContain('Do not display this.');
+  });
 });

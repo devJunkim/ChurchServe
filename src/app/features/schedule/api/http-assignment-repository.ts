@@ -1,6 +1,12 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { catchError, map, Observable, throwError } from 'rxjs';
+import {
+  AppProblemError,
+  asAppProblemError,
+  normalizeHttpProblem,
+} from '../../../core/http/app-problem';
+import { retryTransientRead } from '../../../core/http/retry-transient-read';
 import { AssignVolunteerCommand } from '../assignment';
 import { AssignmentConflictError, AssignmentRepository } from '../assignment-repository';
 import {
@@ -16,10 +22,12 @@ export class HttpAssignmentRepository extends AssignmentRepository {
   loadBoard(eventId: string) {
     return this.http
       .get<unknown>(`/api/service-events/${encodeURIComponent(eventId)}/assignment-board`)
-      .pipe(map(parseAssignmentBoard));
+      .pipe(retryTransientRead(), map(parseAssignmentBoard), normalizeHttpProblem());
   }
 
-  assign(command: AssignVolunteerCommand): Observable<ReturnType<typeof parseAssignVolunteerResult>> {
+  assign(
+    command: AssignVolunteerCommand,
+  ): Observable<ReturnType<typeof parseAssignVolunteerResult>> {
     return this.http
       .post<unknown>(`/api/service-events/${encodeURIComponent(command.eventId)}/assignments`, {
         positionId: command.positionId,
@@ -35,7 +43,11 @@ export class HttpAssignmentRepository extends AssignmentRepository {
             return throwError(() => new AssignmentConflictError(conflict.message, conflict.board));
           }
 
-          return throwError(() => error);
+          return throwError(() =>
+            error instanceof HttpErrorResponse || error instanceof AppProblemError
+              ? asAppProblemError(error)
+              : error,
+          );
         }),
       );
   }

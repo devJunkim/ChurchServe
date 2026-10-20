@@ -18,6 +18,7 @@ import {
 } from 'rxjs';
 import { Volunteer } from '../../shared/domain/volunteer';
 import { VolunteerRepository } from './volunteer-repository';
+import { toAppProblem, unexpectedProblemMessage } from '../../core/http/app-problem';
 
 export type VolunteerSearchState =
   | { status: 'idle'; volunteers: readonly Volunteer[] }
@@ -56,11 +57,11 @@ export class Volunteers {
               this.repository.search(query).pipe(
                 map((volunteers): VolunteerSearchState => ({ status: 'loaded', volunteers })),
                 startWith<VolunteerSearchState>({ status: 'loading', volunteers: [] }),
-                catchError(() =>
+                catchError((error: unknown) =>
                   of<VolunteerSearchState>({
                     status: 'failed',
                     volunteers: [],
-                    message: 'Volunteer search is unavailable. Try again.',
+                    message: volunteerSearchMessage(error),
                   }),
                 ),
               ),
@@ -72,6 +73,20 @@ export class Volunteers {
 
   protected retrySearch(): void {
     this.retryRequested.next();
+  }
+}
+
+function volunteerSearchMessage(error: unknown): string {
+  const problem = toAppProblem(error);
+  switch (problem.kind) {
+    case 'unauthenticated':
+      return 'Your session expired. Sign in again to search volunteers.';
+    case 'forbidden':
+      return 'Your account does not have permission to search volunteers.';
+    case 'unavailable':
+      return 'Volunteer search is temporarily unavailable. Try again.';
+    default:
+      return unexpectedProblemMessage(problem, 'Volunteer search is unavailable. Try again.');
   }
 }
 

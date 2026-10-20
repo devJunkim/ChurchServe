@@ -10,6 +10,7 @@ import { ScheduleQuery } from './schedule-query';
 import { ScheduleStore } from './schedule-store';
 import { ServiceEventRepository } from './service-event-repository';
 import { ServiceEvent } from './service-event';
+import { AppProblemError } from '../../core/http/app-problem';
 
 describe('ScheduleStore', () => {
   const query: ScheduleQuery = { month: '2026-11', ministry: null, page: 1, pageSize: 4 };
@@ -147,6 +148,17 @@ describe('ScheduleStore', () => {
     store.retry();
     expect(store.loadState()).toBe('loaded');
     expect(repository.list).toHaveBeenCalledTimes(2);
+  });
+
+  it('distinguishes an expired session from a connectivity failure', () => {
+    repository.list.mockReturnValue(
+      throwError(() => new AppProblemError({ kind: 'unauthenticated' })),
+    );
+
+    store.load(query);
+
+    expect(store.loadState()).toBe('failed');
+    expect(store.loadError()).toContain('session expired');
   });
 
   it('serves a loaded event from the cache without another repository request', () => {

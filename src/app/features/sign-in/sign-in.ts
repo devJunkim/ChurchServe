@@ -1,9 +1,9 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SessionStore } from '../../core/auth/session-store';
 import { safeReturnUrl } from '../../core/routing/safe-return-url';
+import { toAppProblem } from '../../core/http/app-problem';
 
 @Component({
   selector: 'app-sign-in',
@@ -44,10 +44,13 @@ export class SignIn {
       },
       error: (error: unknown) => {
         this.isSubmitting.set(false);
+        const problem = toAppProblem(error);
         this.errorMessage.set(
-          error instanceof HttpErrorResponse && error.status === 401
+          problem.kind === 'unauthenticated'
             ? 'The email or password was incorrect.'
-            : 'Sign-in is unavailable. Try again.',
+            : problem.kind === 'validation'
+              ? 'Enter a valid email and password.'
+              : 'Sign-in is unavailable. Try again.',
         );
       },
     });

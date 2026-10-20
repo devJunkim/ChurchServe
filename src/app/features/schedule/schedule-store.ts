@@ -3,6 +3,7 @@ import { Observable, Subscription, tap } from 'rxjs';
 import { CACHE_CLOCK } from '../../core/data/cache-clock';
 import { RequestCache } from '../../core/data/request-cache';
 import { reconcileByKey } from '../../core/data/reconcile-by-key';
+import { toAppProblem, unexpectedProblemMessage } from '../../core/http/app-problem';
 import { SessionStore } from '../../core/auth/session-store';
 import { CreateServiceEventCommand } from './create-service-event-command';
 import { Page } from './page';
@@ -89,11 +90,9 @@ export class ScheduleStore {
           this.cacheEvents(items);
           this.loadStateValue.set('loaded');
         },
-        error: () => {
+        error: (error: unknown) => {
           this.loadStateValue.set('failed');
-          this.loadErrorValue.set(
-            'The schedule could not be loaded. Check your connection and try again.',
-          );
+          this.loadErrorValue.set(scheduleLoadMessage(error));
         },
       });
   }
@@ -170,6 +169,20 @@ export class ScheduleStore {
     return this.sessionStore
       ? sessionCacheIdentity(this.sessionStore.session())
       : 'session-not-provided';
+  }
+}
+
+function scheduleLoadMessage(error: unknown): string {
+  const problem = toAppProblem(error);
+  switch (problem.kind) {
+    case 'unauthenticated':
+      return 'Your session expired. Sign in again, then retry the schedule.';
+    case 'forbidden':
+      return 'Your account does not have permission to view this schedule.';
+    case 'unavailable':
+      return 'The schedule service is temporarily unavailable. Try again.';
+    default:
+      return unexpectedProblemMessage(problem, 'The schedule could not be loaded. Try again.');
   }
 }
 

@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { SessionStore } from '../../core/auth/session-store';
 import { CACHE_CLOCK } from '../../core/data/cache-clock';
 import { RequestCache } from '../../core/data/request-cache';
+import { toAppProblem, unexpectedProblemMessage } from '../../core/http/app-problem';
 import { Volunteer } from '../../shared/domain/volunteer';
 import { Assignment, AssignmentBoard, MinistryPosition } from './assignment';
 import { AssignmentConflictError, AssignmentRepository } from './assignment-repository';
@@ -118,9 +119,9 @@ export class AssignmentStore {
           this.applyBoard(board);
           this.loadingState.set(false);
         },
-        error: () => {
+        error: (error: unknown) => {
           this.loadingState.set(false);
-          this.loadErrorState.set('Assignments could not be loaded. Try again.');
+          this.loadErrorState.set(assignmentLoadMessage(error));
         },
       });
   }
@@ -209,7 +210,7 @@ export class AssignmentStore {
             current.filter((assignment) => assignment.clientRequestId !== clientRequestId),
           );
           this.boardCache.invalidate(eventId);
-          this.noticeState.set('The assignment was not saved. Try again.');
+          this.noticeState.set(assignmentSaveMessage(error));
         },
       });
   }
@@ -275,6 +276,36 @@ export class AssignmentStore {
     return this.sessionStore
       ? sessionCacheIdentity(this.sessionStore.session())
       : 'session-not-provided';
+  }
+}
+
+function assignmentLoadMessage(error: unknown): string {
+  const problem = toAppProblem(error);
+  switch (problem.kind) {
+    case 'unauthenticated':
+      return 'Your session expired. Sign in again to load assignments.';
+    case 'forbidden':
+      return 'Your account does not have permission to view assignments.';
+    case 'unavailable':
+      return 'Assignments are temporarily unavailable. Try again.';
+    default:
+      return unexpectedProblemMessage(problem, 'Assignments could not be loaded. Try again.');
+  }
+}
+
+function assignmentSaveMessage(error: unknown): string {
+  const problem = toAppProblem(error);
+  switch (problem.kind) {
+    case 'unauthenticated':
+      return 'Your session expired. The assignment was not saved.';
+    case 'forbidden':
+      return 'Your account does not have permission to assign volunteers.';
+    case 'validation':
+      return 'The assignment was rejected. Refresh the schedule and try again.';
+    case 'unavailable':
+      return 'The assignment was not saved because the service is unavailable. Try again.';
+    default:
+      return unexpectedProblemMessage(problem, 'The assignment was not saved. Try again.');
   }
 }
 
