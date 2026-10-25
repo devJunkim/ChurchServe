@@ -62,21 +62,23 @@
         </p>
       </section>
 
-      <div class="event-grid">
+      <ul class="event-grid" aria-label="Service events">
         @for (event of store.events(); track event.id) {
-          <app-service-event-card [event]="event" />
+          <li><app-service-event-card [event]="event" /></li>
         } @empty {
-          <app-empty-state>
-            <span empty-title>No matching services</span>
-            <p>Try a different month or ministry.</p>
-            @if (query().ministry) {
-              <button empty-actions type="button" (click)="showAllMinistries()">
-                Show all ministries
-              </button>
-            }
-          </app-empty-state>
+          <li class="event-grid-empty">
+            <app-empty-state>
+              <span empty-title>No matching services</span>
+              <p>Try a different month or ministry.</p>
+              @if (query().ministry) {
+                <button empty-actions type="button" (click)="showAllMinistries()">
+                  Show all ministries
+                </button>
+              }
+            </app-empty-state>
+          </li>
         }
-      </div>
+      </ul>
 
       @if (store.page(); as currentPage) {
         <nav class="pagination" aria-label="Schedule pages">

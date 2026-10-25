@@ -1,4 +1,4 @@
-<main class="sign-in-page" aria-labelledby="sign-in-heading">
+<section class="sign-in-page" aria-labelledby="sign-in-heading">
   <a routerLink="/" class="back-link">← Back to home</a>
   <p class="eyebrow">Coordinator access</p>
   <h1 id="sign-in-heading">Sign in to ChurchServe</h1>
@@ -6,9 +6,20 @@
 
   <form [formGroup]="form" (ngSubmit)="signIn()">
     <label for="email">Email</label>
-    <input id="email" type="email" autocomplete="username" formControlName="email" />
+    <input
+      id="email"
+      type="email"
+      autocomplete="username"
+      formControlName="email"
+      [attr.aria-describedby]="
+        form.controls.email.touched && form.controls.email.invalid ? 'email-error' : null
+      "
+      [attr.aria-invalid]="
+        form.controls.email.touched && form.controls.email.invalid ? 'true' : null
+      "
+    />
     @if (form.controls.email.touched && form.controls.email.invalid) {
-      <p class="field-error">Enter a valid email address.</p>
+      <p id="email-error" class="field-error">Enter a valid email address.</p>
     }
 
     <label for="password">Password</label>
@@ -17,9 +28,15 @@
       type="password"
       autocomplete="current-password"
       formControlName="password"
+      [attr.aria-describedby]="
+        form.controls.password.touched && form.controls.password.invalid ? 'password-error' : null
+      "
+      [attr.aria-invalid]="
+        form.controls.password.touched && form.controls.password.invalid ? 'true' : null
+      "
     />
     @if (form.controls.password.touched && form.controls.password.invalid) {
-      <p class="field-error">Enter your password.</p>
+      <p id="password-error" class="field-error">Enter your password.</p>
     }
 
     <button type="submit" [disabled]="isSubmitting()">
@@ -36,4 +53,4 @@
     <span>coordinator@churchserve.local</span>
     <span>Use the password configured in .NET user-secrets.</span>
   </aside>
-</main>
+</section>

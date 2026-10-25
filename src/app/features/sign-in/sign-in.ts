@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SessionStore } from '../../core/auth/session-store';
 import { safeReturnUrl } from '../../core/routing/safe-return-url';
 import { toAppProblem } from '../../core/http/app-problem';
+import { focusFirstInvalidControl } from '../../core/forms/focus-first-invalid-control';
 
 @Component({
   selector: 'app-sign-in',
@@ -16,6 +17,7 @@ export class SignIn {
   private readonly sessionStore = inject(SessionStore);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal('');
@@ -28,8 +30,15 @@ export class SignIn {
   });
 
   protected signIn(): void {
-    if (this.form.invalid || this.isSubmitting()) {
+    if (this.isSubmitting()) {
+      return;
+    }
+
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.host.nativeElement.ownerDocument.defaultView?.setTimeout(() =>
+        focusFirstInvalidControl(this.host.nativeElement),
+      );
       return;
     }
 

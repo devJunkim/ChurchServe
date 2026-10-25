@@ -1,5 +1,12 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
@@ -17,6 +24,7 @@ import { hasPermission, PERMISSIONS } from '../../../core/auth/current-user';
 })
 export class ServiceEventDetail {
   private readonly route = inject(ActivatedRoute);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly selectedVolunteerIds = signal<Readonly<Record<string, string>>>({});
   private readonly sessions = inject(SessionStore);
   protected readonly assignmentStore = inject(AssignmentStore);
@@ -59,6 +67,11 @@ export class ServiceEventDetail {
     if (volunteerId) {
       this.assignmentStore.assign(positionId, volunteerId);
       this.selectedVolunteerIds.update((current) => ({ ...current, [positionId]: '' }));
+      this.host.nativeElement.ownerDocument.defaultView?.setTimeout(() => {
+        this.host.nativeElement.ownerDocument
+          .getElementById(`position-${positionId}`)
+          ?.focus();
+      });
     }
   }
 }

@@ -5,6 +5,7 @@ import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { SessionStore } from '../../core/auth/session-store';
 import { SignIn } from './sign-in';
+import { expectNoAccessibilityViolations } from '../../../testing/expect-no-accessibility-violations';
 
 describe('SignIn', () => {
   let store: { signIn: ReturnType<typeof vi.fn> };
@@ -86,5 +87,31 @@ describe('SignIn', () => {
     expect(fixture.nativeElement.querySelector('[role="alert"]').textContent).toContain(
       'incorrect',
     );
+  });
+
+  it('associates validation text and focuses the first invalid field', async () => {
+    const fixture = TestBed.createComponent(SignIn);
+    fixture.detectChanges();
+    fixture.componentInstance['form'].setValue({ email: 'invalid', password: '' });
+
+    fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(document.activeElement?.id).toBe('email');
+    expect(document.activeElement?.getAttribute('aria-invalid')).toBe('true');
+    expect(document.activeElement?.getAttribute('aria-describedby')).toBe('email-error');
+    expect(fixture.nativeElement.querySelector('#email-error')?.textContent).toContain('valid email');
+  });
+
+  it('has no automatically detectable accessibility violations after validation', async () => {
+    const fixture = TestBed.createComponent(SignIn);
+    fixture.detectChanges();
+    fixture.componentInstance['form'].setValue({ email: 'invalid', password: '' });
+    fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve));
+
+    await expectNoAccessibilityViolations(fixture.nativeElement);
   });
 });

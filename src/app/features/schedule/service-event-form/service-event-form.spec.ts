@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { CreateServiceEventCommand } from '../create-service-event-command';
 import { ServiceEventForm } from './service-event-form';
+import { expectNoAccessibilityViolations } from '../../../../testing/expect-no-accessibility-violations';
 
 describe('ServiceEventForm', () => {
   it('rejects an end time before the start time', () => {
@@ -17,17 +18,20 @@ describe('ServiceEventForm', () => {
     expect(form.hasError('timeRange')).toBe(true);
   });
 
-  it('does not emit an invalid command and reveals validation errors', () => {
+  it('does not emit an invalid command, reveals errors, and focuses the first field', async () => {
     const fixture = TestBed.createComponent(ServiceEventForm);
     const emitted: CreateServiceEventCommand[] = [];
     fixture.componentInstance.submitted.subscribe((value) => emitted.push(value));
 
     fixture.componentInstance.submit();
     fixture.detectChanges();
+    await waitForScheduledFocus();
 
     expect(emitted).toEqual([]);
     expect(fixture.componentInstance.form.controls.title.touched).toBe(true);
     expect(fixture.nativeElement.textContent).toContain('Enter a service name.');
+    expect(document.activeElement?.id).toBe('service-title');
+    expect(document.activeElement?.getAttribute('aria-describedby')).toBe('service-title-error');
   });
 
   it('treats whitespace-only names and locations as invalid', () => {
@@ -69,16 +73,33 @@ describe('ServiceEventForm', () => {
     ]);
   });
 
-  it('shows field errors returned by the server', () => {
+  it('has no automatically detectable accessibility violations after validation', async () => {
     const fixture = TestBed.createComponent(ServiceEventForm);
     fixture.detectChanges();
+    fixture.componentInstance.submit();
+    fixture.detectChanges();
+    await waitForScheduledFocus();
+
+    await expectNoAccessibilityViolations(fixture.nativeElement);
+  });
+
+  it('shows field errors returned by the server and focuses the affected field', async () => {
+    const fixture = TestBed.createComponent(ServiceEventForm);
+    fixture.detectChanges();
+    await waitForScheduledFocus();
     fixture.componentInstance.applyServerErrors({
       title: 'That service name is unavailable.',
       unknown: 'Do not display this.',
     });
     fixture.detectChanges();
+    await waitForScheduledFocus();
 
     expect(fixture.nativeElement.textContent).toContain('That service name is unavailable.');
     expect(fixture.nativeElement.textContent).not.toContain('Do not display this.');
+    expect(document.activeElement?.id).toBe('service-title');
   });
 });
+
+function waitForScheduledFocus(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve));
+}

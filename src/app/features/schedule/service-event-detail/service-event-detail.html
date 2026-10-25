@@ -1,4 +1,4 @@
-<main class="detail-page" aria-labelledby="detail-heading">
+<section class="detail-page" aria-labelledby="detail-heading">
   <a routerLink="/schedule" class="back-link">← Back to schedule</a>
 
   @if (event(); as serviceEvent) {
@@ -53,7 +53,7 @@
       </div>
 
       @if (assignmentStore.notice(); as notice) {
-        <p class="notice" aria-live="polite">{{ notice }}</p>
+        <p class="notice" role="status" aria-atomic="true">{{ notice }}</p>
       }
 
       @if (assignmentStore.loading()) {
@@ -68,10 +68,14 @@
       } @else {
         <ul class="position-list">
           @for (position of assignmentStore.positions(); track position.id) {
-            <li>
+            <li
+              [id]="'position-' + position.id"
+              tabindex="-1"
+              [attr.aria-labelledby]="'position-heading-' + position.id"
+            >
               <div class="position-copy">
                 <span class="ministry">{{ position.ministry }}</span>
-                <h3>{{ position.roleName }}</h3>
+                <h3 [id]="'position-heading-' + position.id">{{ position.roleName }}</h3>
                 <p>
                   {{ position.startsAt | date: 'shortTime' }}–{{
                     position.endsAt | date: 'shortTime'
@@ -122,4 +126,4 @@
       }
     </section>
   }
-</main>
+</section>

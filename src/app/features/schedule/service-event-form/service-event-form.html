@@ -14,10 +14,10 @@
         formControlName="title"
         maxlength="120"
         autocomplete="off"
-        aria-describedby="service-title-error"
-        [attr.aria-invalid]="form.controls.title.touched && form.controls.title.invalid"
+        [attr.aria-describedby]="titleErrorVisible() ? 'service-title-error' : null"
+        [attr.aria-invalid]="titleErrorVisible() ? 'true' : null"
       />
-      @if (form.controls.title.touched && form.controls.title.invalid) {
+      @if (titleErrorVisible()) {
         <p id="service-title-error" class="field-error">
           {{ form.controls.title.getError('server') ?? 'Enter a service name.' }}
         </p>
@@ -30,11 +30,13 @@
         id="service-start"
         type="datetime-local"
         formControlName="startsAt"
-        aria-describedby="service-time-zone service-time-error"
-        [attr.aria-invalid]="form.controls.startsAt.touched && form.controls.startsAt.invalid"
+        [attr.aria-describedby]="startsAtDescriptionIds()"
+        [attr.aria-invalid]="
+          startsAtErrorVisible() || timeRangeErrorVisible() ? 'true' : null
+        "
       />
-      @if (form.controls.startsAt.touched && form.controls.startsAt.invalid) {
-        <p class="field-error">
+      @if (startsAtErrorVisible()) {
+        <p id="service-start-error" class="field-error">
           {{ form.controls.startsAt.getError('server') ?? 'Enter a valid start date and time.' }}
         </p>
       }
@@ -46,11 +48,11 @@
         id="service-end"
         type="datetime-local"
         formControlName="endsAt"
-        aria-describedby="service-time-zone service-time-error"
-        [attr.aria-invalid]="form.controls.endsAt.touched && form.controls.endsAt.invalid"
+        [attr.aria-describedby]="endsAtDescriptionIds()"
+        [attr.aria-invalid]="endsAtErrorVisible() || timeRangeErrorVisible() ? 'true' : null"
       />
-      @if (form.controls.endsAt.touched && form.controls.endsAt.invalid) {
-        <p class="field-error">
+      @if (endsAtErrorVisible()) {
+        <p id="service-end-error" class="field-error">
           {{ form.controls.endsAt.getError('server') ?? 'Enter a valid end date and time.' }}
         </p>
       }
@@ -60,9 +62,7 @@
       Times are interpreted in this device's time zone: {{ deviceTimeZone }}.
     </p>
 
-    @if (
-      (form.controls.startsAt.touched || form.controls.endsAt.touched) && form.hasError('timeRange')
-    ) {
+    @if (timeRangeErrorVisible()) {
       <p id="service-time-error" class="field-error field-wide" role="alert">
         End time must be after start time.
       </p>
@@ -76,10 +76,10 @@
         formControlName="location"
         maxlength="120"
         autocomplete="off"
-        aria-describedby="service-location-error"
-        [attr.aria-invalid]="form.controls.location.touched && form.controls.location.invalid"
+        [attr.aria-describedby]="locationErrorVisible() ? 'service-location-error' : null"
+        [attr.aria-invalid]="locationErrorVisible() ? 'true' : null"
       />
-      @if (form.controls.location.touched && form.controls.location.invalid) {
+      @if (locationErrorVisible()) {
         <p id="service-location-error" class="field-error">
           {{ form.controls.location.getError('server') ?? 'Enter a service location.' }}
         </p>

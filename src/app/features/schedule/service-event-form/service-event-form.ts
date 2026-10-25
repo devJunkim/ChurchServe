@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, output } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -7,6 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { CreateServiceEventCommand } from '../create-service-event-command';
+import { focusFirstInvalidControl } from '../../../core/forms/focus-first-invalid-control';
 
 @Component({
   selector: 'app-service-event-form',
@@ -17,6 +18,7 @@ import { CreateServiceEventCommand } from '../create-service-event-command';
 })
 export class ServiceEventForm {
   private readonly formBuilder = inject(FormBuilder);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   readonly submitted = output<CreateServiceEventCommand>();
 
@@ -51,11 +53,13 @@ export class ServiceEventForm {
         control.markAsTouched();
       }
     }
+    this.scheduleInvalidFocus();
   }
 
   submit(): void {
     this.form.markAllAsTouched();
     if (this.form.invalid) {
+      this.scheduleInvalidFocus();
       return;
     }
 
@@ -66,6 +70,55 @@ export class ServiceEventForm {
       endsAt: new Date(value.endsAt).toISOString(),
       location: value.location.trim(),
     });
+  }
+
+  protected titleErrorVisible(): boolean {
+    return this.form.controls.title.touched && this.form.controls.title.invalid;
+  }
+
+  protected startsAtErrorVisible(): boolean {
+    return this.form.controls.startsAt.touched && this.form.controls.startsAt.invalid;
+  }
+
+  protected endsAtErrorVisible(): boolean {
+    return this.form.controls.endsAt.touched && this.form.controls.endsAt.invalid;
+  }
+
+  protected locationErrorVisible(): boolean {
+    return this.form.controls.location.touched && this.form.controls.location.invalid;
+  }
+
+  protected timeRangeErrorVisible(): boolean {
+    return (
+      (this.form.controls.startsAt.touched || this.form.controls.endsAt.touched) &&
+      this.form.hasError('timeRange')
+    );
+  }
+
+  protected startsAtDescriptionIds(): string {
+    return [
+      'service-time-zone',
+      this.startsAtErrorVisible() ? 'service-start-error' : '',
+      this.timeRangeErrorVisible() ? 'service-time-error' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  protected endsAtDescriptionIds(): string {
+    return [
+      'service-time-zone',
+      this.endsAtErrorVisible() ? 'service-end-error' : '',
+      this.timeRangeErrorVisible() ? 'service-time-error' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  private scheduleInvalidFocus(): void {
+    this.host.nativeElement.ownerDocument.defaultView?.setTimeout(() =>
+      focusFirstInvalidControl(this.host.nativeElement),
+    );
   }
 }
 
