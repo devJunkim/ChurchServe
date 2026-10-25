@@ -35,9 +35,15 @@ h1 {
 
 .event-grid {
   display: grid;
-  margin-top: 2.5rem;
+  margin: 2.5rem 0 0;
+  padding: 0;
   gap: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  list-style: none;
+}
+
+.event-grid > li {
+  min-width: 0;
 }
 
 .schedule-actions {
@@ -59,7 +65,7 @@ h1 {
 }
 
 .schedule-actions a:focus-visible {
-  outline: 3px solid #74c0fc;
+  outline: 3px solid #005a9c;
   outline-offset: 3px;
 }
 
@@ -94,7 +100,7 @@ h1 {
 
 .schedule-filter-fields input:focus-visible,
 .schedule-filter-fields select:focus-visible {
-  outline: 3px solid #74c0fc;
+  outline: 3px solid #005a9c;
   outline-offset: 2px;
 }
 
@@ -155,11 +161,11 @@ h1 {
 }
 
 .error-state button:focus-visible {
-  outline: 3px solid #fdba74;
+  outline: 3px solid #005a9c;
   outline-offset: 3px;
 }
 
-app-empty-state {
+.event-grid-empty {
   grid-column: 1 / -1;
 }
 
@@ -204,7 +210,7 @@ app-empty-state button {
 }
 
 .pagination button:focus-visible {
-  outline: 3px solid #74c0fc;
+  outline: 3px solid #005a9c;
   outline-offset: 2px;
 }
 

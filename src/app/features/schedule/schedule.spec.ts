@@ -9,6 +9,7 @@ import { ScheduleStore } from './schedule-store';
 import { ServiceEventRepository } from './service-event-repository';
 import { ServiceEvent } from './service-event';
 import { SessionState, SessionStore } from '../../core/auth/session-store';
+import { expectNoAccessibilityViolations } from '../../../testing/expect-no-accessibility-violations';
 
 describe('Schedule', () => {
   const first: ServiceEvent = {
@@ -82,6 +83,7 @@ describe('Schedule', () => {
 
     const element: HTMLElement = fixture.nativeElement;
     expect(element.querySelectorAll('app-service-event-card')).toHaveLength(2);
+    expect(element.querySelectorAll('.event-grid > li')).toHaveLength(2);
     expect(element.querySelector('app-service-event-card a')?.getAttribute('href')).toBe(
       '/schedule/event-1',
     );
@@ -89,6 +91,13 @@ describe('Schedule', () => {
       '/schedule/new',
     );
     expect(element.querySelector('.schedule-summary')?.textContent).toContain('4 open positions');
+  });
+
+  it('has no automatically detectable accessibility violations in the ready state', async () => {
+    const fixture = TestBed.createComponent(Schedule);
+    fixture.detectChanges();
+
+    await expectNoAccessibilityViolations(fixture.nativeElement);
   });
 
   it('shows a loading status without an empty-state message', () => {

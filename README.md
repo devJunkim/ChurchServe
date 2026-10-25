@@ -4,11 +4,11 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 22: Security, Authorization, and Privacy**.
-The API now translates roles into explicit schedule and volunteer permissions, places those
-capabilities in the authenticated session, and enforces policy checks on every protected endpoint.
-Angular uses the same session permissions to hide unavailable actions and guard lazy routes, while
-the server remains the security boundary and returns `403 Forbidden` for unauthorized operations.
+This repository currently represents **Part 23: Accessibility and Keyboard Navigation**.
+Angular now exposes one main landmark, semantic schedule lists, path-aware route focus, associated
+form errors, first-invalid-field focus, and stable focus after an optimistic assignment replaces
+its action controls. High-contrast focus indicators and reduced-motion preferences support keyboard
+and low-motion users, while automated accessibility scans supplement manual keyboard and screen-reader checks.
 
 ## Pinned toolchain
 
@@ -72,7 +72,7 @@ SQLite keeps schedule and volunteer data runnable without installing a database 
 The EF Core boundary remains provider-focused so a later part can replace SQLite with
 Microsoft SQL Server while preserving the HTTP contract and Angular repositories.
 
-## Verify Part 22
+## Verify Part 23
 
 ```bash
 dotnet test ChurchServe.slnx
@@ -91,8 +91,9 @@ sharing, bounded expiry-based caching, LRU eviction, mutation invalidation, stab
 memoized assignment lookups and eligible-volunteer collections, derived values,
 session restoration, sign-in transitions, password handling,
 sign-out timing, guarded redirects, safe return URLs, resolver outcomes, dirty-form
-navigation, content projection, URL query parsing, HTTP repositories, request states,
-debouncing, and cancellation. API integration tests exercise real antiforgery tokens,
+navigation, path-aware focus handoff, semantic schedule lists, accessible form errors,
+assignment focus preservation, content projection, URL query parsing, HTTP repositories, request states,
+debouncing, cancellation, and axe scans of representative rendered states. API integration tests exercise real antiforgery tokens,
 encrypted authentication cookies, protected endpoints, invalid credentials, logout, and assignment
 mutations. Part 21 tests also verify problem-detail normalization, correlation references, bounded
 transient-read retries, non-retryable failures, safe global reporting, field-level server validation,

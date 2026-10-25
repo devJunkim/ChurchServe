@@ -8,6 +8,7 @@ import { AssignmentStore } from '../assignment-store';
 import { ServiceEvent } from '../service-event';
 import { ServiceEventDetail } from './service-event-detail';
 import { SessionState, SessionStore } from '../../../core/auth/session-store';
+import { expectNoAccessibilityViolations } from '../../../../testing/expect-no-accessibility-violations';
 
 describe('ServiceEventDetail assignments', () => {
   const session = signal<SessionState>({
@@ -21,7 +22,7 @@ describe('ServiceEventDetail assignments', () => {
     },
   });
 
-  it('renders an optimistic assignment and then confirms it', () => {
+  it('renders an optimistic assignment, preserves focus, and then confirms it', async () => {
     const repository = new DetailAssignmentRepository();
     TestBed.configureTestingModule({
       providers: [
@@ -52,8 +53,10 @@ describe('ServiceEventDetail assignments', () => {
     expect(button.disabled).toBe(false);
     button.click();
     fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve));
 
     expect(fixture.nativeElement.textContent).toContain('Saving…');
+    expect(document.activeElement?.id).toBe('position-sound-1');
     expect(repository.commands[0]).toEqual(
       expect.objectContaining({ expectedEventVersion: 3, volunteerId: 'alex' }),
     );
@@ -107,6 +110,36 @@ describe('ServiceEventDetail assignments', () => {
     expect(fixture.nativeElement.textContent).toContain('Unfilled');
     expect(fixture.nativeElement.querySelector('[data-action="assign"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('.assignment-action')).toBeNull();
+  });
+
+  it('has no automatically detectable accessibility violations on the assignment board', async () => {
+    session.set({
+      status: 'authenticated',
+      user: {
+        id: 'coordinator-1',
+        email: 'coordinator@churchserve.local',
+        displayName: 'Demo Coordinator',
+        roles: ['scheduler'],
+        permissions: ['schedule.read', 'schedule.manage', 'volunteer.read', 'volunteer.manage'],
+      },
+    });
+    const repository = new DetailAssignmentRepository();
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        AssignmentStore,
+        { provide: SessionStore, useValue: { session: session.asReadonly() } },
+        { provide: AssignmentRepository, useValue: repository },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { data: { serviceEvent } }, data: of({ serviceEvent }) },
+        },
+      ],
+    });
+    const fixture = TestBed.createComponent(ServiceEventDetail);
+    fixture.detectChanges();
+
+    await expectNoAccessibilityViolations(fixture.nativeElement);
   });
 });
 
