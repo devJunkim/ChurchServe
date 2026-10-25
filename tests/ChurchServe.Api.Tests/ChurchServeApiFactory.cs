@@ -12,15 +12,17 @@ public sealed class ChurchServeApiFactory : WebApplicationFactory<Program>
 {
   private SqliteConnection? connection;
   private readonly string role;
+  private readonly string environment;
 
-  public ChurchServeApiFactory(string role = "scheduler")
+  public ChurchServeApiFactory(string role = "scheduler", string environment = "Testing")
   {
     this.role = role;
+    this.environment = environment;
   }
 
   protected override void ConfigureWebHost(IWebHostBuilder builder)
   {
-    builder.UseEnvironment("Testing");
+    builder.UseEnvironment(environment);
     builder.UseSetting("Authentication:LocalAccount:Id", "coordinator-1");
     builder.UseSetting("Authentication:LocalAccount:Email", "coordinator@churchserve.local");
     builder.UseSetting("Authentication:LocalAccount:DisplayName", "Test Coordinator");

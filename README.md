@@ -4,11 +4,11 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 23: Accessibility and Keyboard Navigation**.
-Angular now exposes one main landmark, semantic schedule lists, path-aware route focus, associated
-form errors, first-invalid-field focus, and stable focus after an optimistic assignment replaces
-its action controls. High-contrast focus indicators and reduced-motion preferences support keyboard
-and low-motion users, while automated accessibility scans supplement manual keyboard and screen-reader checks.
+This repository currently represents **Part 24: End-to-End Tests for Critical Workflows**.
+Playwright now starts an isolated Angular application and ASP.NET Core API, resets deterministic
+SQLite fixture data before each scenario, and exercises authentication, event creation, keyboard
+assignment, sign-out protection, and stale-write conflict recovery through a real browser. Failure-only
+traces, screenshots, and videos keep CI evidence useful without retaining successful-run artifacts.
 
 ## Pinned toolchain
 
@@ -17,6 +17,7 @@ and low-motion users, while automated accessibility scans supplement manual keyb
 - Node.js used to generate Part 1: 26.8.2
 - npm used to generate Part 1: 11.19.1
 - Unit test runner: Vitest 5
+- End-to-end test runner: Playwright 1.64
 - .NET SDK: 10
 - EF Core SQLite: 10.0.13
 
@@ -72,7 +73,31 @@ SQLite keeps schedule and volunteer data runnable without installing a database 
 The EF Core boundary remains provider-focused so a later part can replace SQLite with
 Microsoft SQL Server while preserving the HTTP contract and Angular repositories.
 
-## Verify Part 23
+## Run the critical browser journeys
+
+Install the pinned Chromium build once after `npm ci`:
+
+```bash
+npx playwright install chromium
+```
+
+Then run the end-to-end suite:
+
+```bash
+npm run test:e2e
+```
+
+Playwright uses dedicated ports `4202` and `5092`, a disposable
+`.churchserve.e2e.db` database, and a synthetic account that exists only in the
+spawned `Testing` environment. The suite resets the database before each scenario
+and runs with one worker so tests cannot race through shared fixture state. The
+`POST /api/test/reset` endpoint is mapped only when the API environment is `Testing`.
+
+Use `npm run test:e2e:ui` for local interactive debugging. Failed tests retain
+artifacts under `test-results/` and an HTML report under `playwright-report/`;
+both directories are ignored by Git.
+
+## Verify Part 24
 
 ```bash
 dotnet test ChurchServe.slnx
@@ -80,6 +105,7 @@ npm run test:ci
 npm run test:coverage
 npm run check:architecture
 npm run build
+npm run test:e2e
 ```
 
 The API integration tests use isolated in-memory SQLite databases to verify schedule
@@ -103,6 +129,9 @@ test. The suite retains keyed reconciliation across unchanged, updated,
 reordered, and empty collections plus the existing normalized cache-key, failed-request recovery,
 freshness, role-aware clearing, optimistic confirmation, rollback, conflict, and DTO coverage.
 The production build verifies strict TypeScript and Angular template compilation.
+Part 24 adds Testing-environment fixture-boundary tests and four Chromium journeys
+covering sign-in/sign-out protection, validation and event creation, keyboard-only
+assignment, and stale assignment conflict recovery.
 
 ## Current structure
 
@@ -113,10 +142,16 @@ server/
     Authentication/
     Data/
     ServiceEvents/
+    Testing/
     Volunteers/
     Program.cs
 tests/
   ChurchServe.Api.Tests/
+e2e/
+  churchserve.spec.ts
+  proxy.conf.json
+  test-account.ts
+playwright.config.ts
 src/testing/
   fake-service-event-repository.ts
   service-event.builder.ts
