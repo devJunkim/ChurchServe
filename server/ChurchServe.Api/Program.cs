@@ -2,6 +2,7 @@ using ChurchServe.Api.Assignments;
 using ChurchServe.Api.Authentication;
 using ChurchServe.Api.Data;
 using ChurchServe.Api.ServiceEvents;
+using ChurchServe.Api.Testing;
 using ChurchServe.Api.Volunteers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -69,6 +70,10 @@ app.MapSessionEndpoints();
 app.MapServiceEventEndpoints().RequireAuthorization();
 app.MapAssignmentEndpoints().RequireAuthorization();
 app.MapVolunteerEndpoints().RequireAuthorization();
+if (app.Environment.IsEnvironment("Testing"))
+{
+  app.MapTestFixtureEndpoints();
+}
 
 app.Run();
 

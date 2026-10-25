@@ -40,6 +40,11 @@ yarn-error.log
 .sass-cache/
 /connect.lock
 /coverage
+/playwright-report
+/test-results
+/.churchserve.e2e.db
+/.churchserve.e2e.db-shm
+/.churchserve.e2e.db-wal
 /libpeerconnection.log
 testem.log
 /typings
