@@ -4,5 +4,11 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "warn"
+  },
+  "/runtime-config.json": {
+    "target": "http://127.0.0.1:5092",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "warn"
   }
 }

@@ -4,5 +4,17 @@
     "secure": false,
     "changeOrigin": true,
     "logLevel": "info"
+  },
+  "/runtime-config.json": {
+    "target": "http://localhost:5091",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  },
+  "/health": {
+    "target": "http://localhost:5091",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
   }
 }

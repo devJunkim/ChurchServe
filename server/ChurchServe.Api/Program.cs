@@ -1,6 +1,7 @@
 using ChurchServe.Api.Assignments;
 using ChurchServe.Api.Authentication;
 using ChurchServe.Api.Data;
+using ChurchServe.Api.Deployment;
 using ChurchServe.Api.ServiceEvents;
 using ChurchServe.Api.Testing;
 using ChurchServe.Api.Volunteers;
@@ -14,6 +15,16 @@ var connectionString = builder.Configuration.GetConnectionString("ChurchServe")
 
 builder.Services.AddDbContext<ChurchServeDbContext>(options => options.UseSqlite(connectionString));
 builder.Services.AddScoped<VolunteerDirectory>();
+builder.Services
+    .AddOptions<PublicRuntimeOptions>()
+    .Bind(builder.Configuration.GetSection(PublicRuntimeOptions.SectionName))
+    .Validate(PublicRuntimeOptions.HasValidApiBaseUrl,
+        "PublicRuntime:ApiBaseUrl must be a same-origin absolute path.")
+    .Validate(PublicRuntimeOptions.HasValidRelease,
+        "PublicRuntime:Release must be between 1 and 100 characters.")
+    .ValidateOnStart();
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>("database", tags: ["ready"]);
 builder.Services.Configure<LocalAccountOptions>(
     builder.Configuration.GetSection(LocalAccountOptions.SectionName));
 builder.Services.AddSingleton<LocalAccountAuthenticator>();
@@ -63,6 +74,8 @@ await using (var scope = app.Services.CreateAsyncScope())
       scope.ServiceProvider.GetRequiredService<ChurchServeDbContext>());
 }
 
+app.UseDeploymentHeaders();
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -70,10 +83,17 @@ app.MapSessionEndpoints();
 app.MapServiceEventEndpoints().RequireAuthorization();
 app.MapAssignmentEndpoints().RequireAuthorization();
 app.MapVolunteerEndpoints().RequireAuthorization();
+app.MapDeploymentEndpoints();
 if (app.Environment.IsEnvironment("Testing"))
 {
   app.MapTestFixtureEndpoints();
 }
+
+app.MapMethods(
+    "/api/{**path}",
+    ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
+    () => Results.NotFound());
+app.MapFallbackToFile("index.html");
 
 app.Run();
 

@@ -4,11 +4,11 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 24: End-to-End Tests for Critical Workflows**.
-Playwright now starts an isolated Angular application and ASP.NET Core API, resets deterministic
-SQLite fixture data before each scenario, and exercises authentication, event creation, keyboard
-assignment, sign-out protection, and stale-write conflict recovery through a real browser. Failure-only
-traces, screenshots, and videos keep CI evidence useful without retaining successful-run artifacts.
+This repository currently represents **Part 25: Production Build and Deployment**.
+Angular now loads validated public runtime configuration before bootstrap, while ASP.NET Core serves
+the optimized browser files and API from one same-origin release artifact. The host exposes liveness
+and database-backed readiness probes, keeps SPA fallback away from missing API and asset routes, and
+applies security and cache headers. CI smoke-tests the published output before retaining it as an artifact.
 
 ## Pinned toolchain
 
@@ -52,6 +52,54 @@ dotnet user-secrets set --project server/ChurchServe.Api "Authentication:LocalAc
 
 The local account authenticator is disabled outside Development and Testing; replace it
 with ASP.NET Core Identity or an external identity provider for a deployed application.
+Part 25 prepares and verifies the deployable artifact but deliberately does not weaken that
+authentication boundary.
+
+## Build and verify a release artifact
+
+Create one framework-dependent ASP.NET Core artifact containing the optimized Angular application:
+
+```bash
+npm ci
+npm run build:release
+```
+
+The artifact is written to `artifacts/publish/`. Angular's size budgets and automatic script CSP
+run during the production build, and the .NET publish target fails when the browser output is absent.
+The server reads public configuration at startup and returns it from `/runtime-config.json`:
+
+```bash
+PublicRuntime__ApiBaseUrl=/api
+PublicRuntime__Release=2026.10.25.1
+ConnectionStrings__ChurchServe="Data Source=/data/churchserve.db"
+```
+
+`PublicRuntime__ApiBaseUrl` must be a same-origin absolute path because ChurchServe uses strict
+same-origin cookies and antiforgery. Runtime configuration is visible to every browser and must
+never contain secrets.
+
+Smoke-test the exact published output in the `Production` environment:
+
+```bash
+npm run test:release
+```
+
+The verifier chooses an available loopback port and a temporary SQLite database. It checks the
+application shell, a deep link, missing API and asset 404s, runtime configuration, liveness and
+readiness, response headers, immutable fingerprinted assets, source-map exclusion, and known
+configuration-secret markers. The temporary database is removed after the process stops.
+
+The host endpoints are:
+
+```text
+GET /runtime-config.json  -> public deploy-time browser settings
+GET /health/live          -> process is running
+GET /health/ready         -> required database is reachable
+```
+
+TLS termination, durable storage, backups, a production identity provider, and release promotion
+remain responsibilities of the selected hosting platform. Keep the previous artifact available and
+use backward-compatible database changes so rollback does not depend on rebuilding older source.
 
 ## API contract
 
@@ -97,7 +145,7 @@ Use `npm run test:e2e:ui` for local interactive debugging. Failed tests retain
 artifacts under `test-results/` and an HTML report under `playwright-report/`;
 both directories are ignored by Git.
 
-## Verify Part 24
+## Verify Part 25
 
 ```bash
 dotnet test ChurchServe.slnx
@@ -106,6 +154,8 @@ npm run test:coverage
 npm run check:architecture
 npm run build
 npm run test:e2e
+npm run build:release
+npm run test:release
 ```
 
 The API integration tests use isolated in-memory SQLite databases to verify schedule
@@ -132,6 +182,9 @@ The production build verifies strict TypeScript and Angular template compilation
 Part 24 adds Testing-environment fixture-boundary tests and four Chromium journeys
 covering sign-in/sign-out protection, validation and event creation, keyboard-only
 assignment, and stale assignment conflict recovery.
+Part 25 adds eight Angular runtime-configuration tests, four deployment endpoint tests,
+and a smoke test against the complete published artifact. CI uploads that verified artifact
+with the commit SHA in its name.
 
 ## Current structure
 
@@ -141,6 +194,7 @@ server/
     Assignments/
     Authentication/
     Data/
+    Deployment/
     ServiceEvents/
     Testing/
     Volunteers/
@@ -158,6 +212,7 @@ src/testing/
 src/app/
   core/
     auth/
+    config/
     data/
     errors/
     http/
