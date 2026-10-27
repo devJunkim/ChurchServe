@@ -2,6 +2,7 @@ using ChurchServe.Api.Assignments;
 using ChurchServe.Api.Authentication;
 using ChurchServe.Api.Data;
 using ChurchServe.Api.Deployment;
+using ChurchServe.Api.Observability;
 using ChurchServe.Api.ServiceEvents;
 using ChurchServe.Api.Testing;
 using ChurchServe.Api.Volunteers;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddChurchServeObservability();
 
 var connectionString = builder.Configuration.GetConnectionString("ChurchServe")
     ?? throw new InvalidOperationException("Connection string 'ChurchServe' was not configured.");
@@ -25,6 +27,13 @@ builder.Services
     .ValidateOnStart();
 builder.Services.AddHealthChecks()
     .AddCheck<DatabaseHealthCheck>("database", tags: ["ready"]);
+builder.Services.AddProblemDetails(options =>
+{
+  options.CustomizeProblemDetails = context =>
+  {
+    context.ProblemDetails.Extensions["traceId"] = CorrelationIdMiddleware.Get(context.HttpContext);
+  };
+});
 builder.Services.Configure<LocalAccountOptions>(
     builder.Configuration.GetSection(LocalAccountOptions.SectionName));
 builder.Services.AddSingleton<LocalAccountAuthenticator>();
@@ -76,6 +85,8 @@ await using (var scope = app.Services.CreateAsyncScope())
 
 app.UseDeploymentHeaders();
 app.UseStaticFiles();
+app.UseCorrelationId();
+app.UseExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -83,6 +94,7 @@ app.MapSessionEndpoints();
 app.MapServiceEventEndpoints().RequireAuthorization();
 app.MapAssignmentEndpoints().RequireAuthorization();
 app.MapVolunteerEndpoints().RequireAuthorization();
+app.MapBrowserTelemetryEndpoint();
 app.MapDeploymentEndpoints();
 if (app.Environment.IsEnvironment("Testing"))
 {

@@ -22,7 +22,7 @@ const server = spawn('dotnet', [applicationDll, '--urls', baseUrl], {
     ASPNETCORE_ENVIRONMENT: 'Production',
     ConnectionStrings__ChurchServe: `Data Source=${databasePath}`,
     PublicRuntime__ApiBaseUrl: '/api',
-    PublicRuntime__Release: 'part-25-verification',
+    PublicRuntime__Release: 'part-26-verification',
   },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
@@ -51,14 +51,16 @@ try {
   const missingApi = await fetch(`${baseUrl}/api/not-a-real-route`);
   assert.equal(missingApi.status, 404);
   assert.doesNotMatch(missingApi.headers.get('content-type') ?? '', /^text\/html/);
+  assert.match(missingApi.headers.get('x-correlation-id') ?? '', /^[A-Za-z0-9_-]{8,64}$/);
 
   const runtime = await fetch(`${baseUrl}/runtime-config.json`);
   assert.equal(runtime.status, 200);
   assert.match(runtime.headers.get('cache-control') ?? '', /no-store/);
   assert.deepEqual(await runtime.json(), {
     apiBaseUrl: '/api',
-    release: 'part-25-verification',
+    release: 'part-26-verification',
   });
+  assert.match(runtime.headers.get('x-correlation-id') ?? '', /^[A-Za-z0-9_-]{8,64}$/);
 
   for (const healthPath of ['/health/live', '/health/ready']) {
     const health = await fetch(`${baseUrl}${healthPath}`);
@@ -82,7 +84,7 @@ try {
   await assertBuiltAssetsContainNoConfigurationSecrets(assetNames);
 
   console.log(
-    'Release verification passed: configuration, probes, SPA fallback, headers, and assets.',
+    'Release verification passed: configuration, probes, correlation, SPA fallback, headers, and assets.',
   );
 } catch (error) {
   console.error(output);
