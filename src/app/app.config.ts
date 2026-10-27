@@ -12,6 +12,7 @@ import { SessionStore } from './core/auth/session-store';
 import { GlobalErrorHandler } from './core/errors/global-error-handler';
 import { routes } from './app.routes';
 import { apiBaseUrlInterceptor, RUNTIME_CONFIG, RuntimeConfig } from './core/config/runtime-config';
+import { httpTelemetryInterceptor } from './core/telemetry/http-telemetry.interceptor';
 
 export function createAppConfig(runtimeConfig: RuntimeConfig): ApplicationConfig {
   return {
@@ -19,7 +20,7 @@ export function createAppConfig(runtimeConfig: RuntimeConfig): ApplicationConfig
       provideBrowserGlobalErrorListeners(),
       { provide: ErrorHandler, useClass: GlobalErrorHandler },
       { provide: RUNTIME_CONFIG, useValue: runtimeConfig },
-      provideHttpClient(withInterceptors([apiBaseUrlInterceptor])),
+      provideHttpClient(withInterceptors([httpTelemetryInterceptor, apiBaseUrlInterceptor])),
       provideAppInitializer(() => firstValueFrom(inject(SessionStore).restore())),
       provideRouter(routes),
     ],

@@ -4,11 +4,13 @@ ChurchServe is the single evolving application used by the ChurchServe Angular
 tutorial series. It helps church coordinators plan service events, organize
 ministry positions, and identify where volunteers are still needed.
 
-This repository currently represents **Part 25: Production Build and Deployment**.
+This repository currently represents **Part 26: Observability and the Final Milestone**.
 Angular now loads validated public runtime configuration before bootstrap, while ASP.NET Core serves
 the optimized browser files and API from one same-origin release artifact. The host exposes liveness
 and database-backed readiness probes, keeps SPA fallback away from missing API and asset routes, and
 applies security and cache headers. CI smoke-tests the published output before retaining it as an artifact.
+Part 26 adds privacy-bounded browser telemetry, end-to-end correlation identifiers, structured server
+logs, and OpenTelemetry traces and metrics with an optional OTLP exporter.
 
 ## Pinned toolchain
 
@@ -70,7 +72,7 @@ The server reads public configuration at startup and returns it from `/runtime-c
 
 ```bash
 PublicRuntime__ApiBaseUrl=/api
-PublicRuntime__Release=2026.10.25.1
+PublicRuntime__Release=2026.10.26.1
 ConnectionStrings__ChurchServe="Data Source=/data/churchserve.db"
 ```
 
@@ -101,6 +103,26 @@ TLS termination, durable storage, backups, a production identity provider, and r
 remain responsibilities of the selected hosting platform. Keep the previous artifact available and
 use backward-compatible database changes so rollback does not depend on rebuilding older source.
 
+## Observe a running release
+
+Every API response includes `X-Correlation-ID`. The browser supplies the identifier on API requests,
+the server places it in structured log scopes and traces, and safe Problem Details responses return it
+as `traceId`. Support can therefore connect a browser-visible reference to server diagnostics without
+returning exception details to the user.
+
+Server logs are JSON in Development and Production. ASP.NET Core request traces, runtime and HTTP
+metrics, and the bounded browser event meter use OpenTelemetry. To send all three signals to an
+OpenTelemetry Collector or compatible backend, set the standard OTLP endpoint before starting the host:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+```
+
+When that variable is absent, ChurchServe keeps normal JSON console logs and does not attempt a remote
+export. Browser events accept only fixed event, operation, and outcome names. They deliberately omit
+URLs, query strings, event identifiers, volunteer names, email addresses, request bodies, and error
+messages; the API rejects extra payload properties instead of silently storing them.
+
 ## API contract
 
 The ASP.NET Core server implements these endpoints:
@@ -115,6 +137,7 @@ GET  /api/volunteers?query={name}
 GET  /api/session
 POST /api/session/sign-in
 DELETE /api/session
+POST /api/telemetry
 ```
 
 SQLite keeps schedule and volunteer data runnable without installing a database server.
@@ -145,7 +168,7 @@ Use `npm run test:e2e:ui` for local interactive debugging. Failed tests retain
 artifacts under `test-results/` and an HTML report under `playwright-report/`;
 both directories are ignored by Git.
 
-## Verify Part 25
+## Verify Part 26
 
 ```bash
 dotnet test ChurchServe.slnx
@@ -185,6 +208,9 @@ assignment, and stale assignment conflict recovery.
 Part 25 adds eight Angular runtime-configuration tests, four deployment endpoint tests,
 and a smoke test against the complete published artifact. CI uploads that verified artifact
 with the commit SHA in its name.
+Part 26 adds browser event contract and interceptor tests plus API integration tests for authentication,
+strict payload rejection, correlation propagation, and safe handled failures. The release smoke test also
+verifies correlation headers from the published application.
 
 ## Current structure
 
@@ -217,6 +243,7 @@ src/app/
     errors/
     http/
     routing/
+    telemetry/
   features/
     home/
     navigation-unavailable/
