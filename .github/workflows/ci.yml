@@ -39,11 +39,14 @@ jobs:
       - name: Check architecture boundaries
         run: npm run check:architecture
 
-      - name: Build Angular application
-        run: npm run build
+      - name: Build production release artifact
+        run: npm run build:release
 
       - name: Run API integration tests
         run: dotnet test ChurchServe.slnx --configuration Release
+
+      - name: Verify published release artifact
+        run: npm run test:release
 
       - name: Run critical browser journeys
         run: npm run test:e2e
@@ -57,4 +60,12 @@ jobs:
             playwright-report/
             test-results/
           if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload production release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: churchserve-${{ github.sha }}
+          path: artifacts/publish/
+          if-no-files-found: error
           retention-days: 7
